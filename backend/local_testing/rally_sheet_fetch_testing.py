@@ -8,6 +8,24 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+
+#TODO: Fetch all sheet names in the spreadsheet, and then fetch data from the correct sheet based on the date of the rallycross event (e.g. if the event is on 3/22/2026, fetch data from the sheet with the name that contains "3/22/2026" or "March 22, 2026") - For your project: Combine #1 (Dynamic Sheet Selection) + #4 (Date-Based Fetching)
+#TODO: Dynamic Range Selection - Count of rows will be dynamic based on number of Racers for that Event
+#TODO: Organize the fetched data into a structured format (e.g. a list of dictionaries where each dictionary represents a row of data with column names as keys) 
+#TODO: Later add google sheet cache + data update functionality - For your project: Combine #2 (Polling with Cache) + #5 (Manual Refresh) 
+
+"""
+Example Data Fetched from the Google Sheet:
+Values from spreadsheet '1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4', range '#74 3/22/2026 PE1!B8:P37':
+['Overall', 'Driver', 'Car', 'Class', 'Class rank', 'Avg time', 'differential', 'Runs', 'min', 'max', 'min/max diff', 'Raw time', 'Cones', 'Penalty', 'Total time']
+['1', 'Blanton Payne ', '91 Honda Civic Marlboro Gold and white', 'FWD', '1', '86.79', '', '8', '85.10', '89.00', '3.90', '694.3', '0', '0', '694.3']
+['2', 'Alex Greenbaum', '98 Subaru Outback Sport red', 'AWD', '1', '87.78', '0.99', '8', '86.37', '89.59', '3.22', '702.3', '0', '0', '702.3']
+['3', 'Lawrence Doeppenschmidt', 'Black STI', 'AWD', '2', '88.18', '0.40', '8', '86.66', '90.28', '3.62', '703.5', '1', '2', '705.5']
+['4', 'Adam West', '03 Subaru WRX Blue', 'AWD', '3', '88.41', '0.23', '8', '85.81', '90.78', '4.97', '707.3', '0', '0', '707.3']
+"""
+
+
+
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
@@ -44,6 +62,28 @@ def build_credentials():
   
   return creds
 
+def get_all_sheet_names(service, spreadsheet_id):
+    """Get all sheet/tab names from a spreadsheet."""
+    try:
+        # Get spreadsheet metadata
+        spreadsheet = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        
+        # Extract sheet names
+        sheets = spreadsheet.get('sheets', [])
+
+        print(f"\nFound {len(sheets)} sheets:")
+        for sheet in sheets:
+            properties = sheet.get('properties', {})
+            sheet_name = properties.get('title', 'Unknown')
+            sheet_id = properties.get('sheetId', 'Unknown')
+            print(f"  - '{sheet_name}' (ID: {sheet_id})")
+        
+        return [sheet.get('properties', {}).get('title') for sheet in sheets]
+    
+    except HttpError as err:
+        print(f"Error: {err}")
+        return []
+
 def main():
   """Shows basic usage of the Sheets API.
   Prints values from a sample spreadsheet.
@@ -53,6 +93,9 @@ def main():
   try:
     service = build("sheets", "v4", credentials=creds)
 
+    # # Get all sheet names
+    # sheet_names = get_all_sheet_names(service, RALLYCROSS_SPREADSHEET_ID)
+    
     # Call the Sheets API
     sheet = service.spreadsheets()
     result = (
@@ -70,6 +113,8 @@ def main():
 
     for row in values:
       print(f"{row}")
+
+
   except HttpError as err:
     print(err)
 
