@@ -1,3 +1,6 @@
+import json
+import re
+
 from logging import root
 import os.path
 import pathlib
@@ -32,9 +35,6 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 # The ID and range of a sample spreadsheet.
 RALLYCROSS_SPREADSHEET_ID = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
 
-TAB_NAME = "#74 3/22/2026 PE1"
-RANGE_NAME = f"{TAB_NAME}!B8:P37"
-
 #use parent dir of this file as the working dir, so that the credentials.json and token.json files are in the same dir as this file
 root_dir = pathlib.Path(__file__).parent
 
@@ -62,7 +62,7 @@ def build_credentials():
   
   return creds
 
-def get_all_sheet_names(service, spreadsheet_id):
+def get_all_sheet_names(service, spreadsheet_id, debug=False):
     """Get all sheet/tab names from a spreadsheet."""
     try:
         # Get spreadsheet metadata
@@ -71,18 +71,108 @@ def get_all_sheet_names(service, spreadsheet_id):
         # Extract sheet names
         sheets = spreadsheet.get('sheets', [])
 
-        print(f"\nFound {len(sheets)} sheets:")
-        for sheet in sheets:
-            properties = sheet.get('properties', {})
-            sheet_name = properties.get('title', 'Unknown')
-            sheet_id = properties.get('sheetId', 'Unknown')
-            print(f"  - '{sheet_name}' (ID: {sheet_id})")
+        if debug:
+            print(f"\nFound {len(sheets)} sheets:")
+            for sheet in sheets:
+                properties = sheet.get('properties', {})
+                sheet_name = properties.get('title', 'Unknown')
+                sheet_id = properties.get('sheetId', 'Unknown')
+                print(f"  - '{sheet_name}' (ID: {sheet_id})")
         
         return [sheet.get('properties', {}).get('title') for sheet in sheets]
     
     except HttpError as err:
         print(f"Error: {err}")
         return []
+
+def filter_sheets_by_name_keyword(sheet_names, keyword):
+    """Filter sheet names based on a keyword (e.g., date)."""
+    filtered_sheets = [name for name in sheet_names if keyword in name]
+    
+    print(f"\nSheets containing '{keyword}':")
+    for name in filtered_sheets:
+        print(f"  - {name}")
+    
+    return filtered_sheets
+   
+def get_filtered_sheet_data(service, spreadsheet_id, sheet_name, range_start="B8", range_end="P400"):
+    """Fetch data from a specific sheet/tab based on its name."""
+    range_name = f"{sheet_name}!{range_start}:{range_end}"
+    
+    try:
+        result = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range_name).execute()
+        values = result.get('values', [])
+        
+        if not values:
+            print(f"No data found in sheet '{sheet_name}' for range '{range_name}'.")
+            return []
+        
+        return values
+    
+    except HttpError as err:
+        print(f"Error fetching data from sheet '{sheet_name}': {err}")
+        return []
+
+def sanitize_headers(headers):
+    sanitized = []
+    last_run = None
+    run_pattern = re.compile(r'^run_(\d+)$')
+    for header in headers:
+        h = re.sub(r'[^A-Za-z0-9]+', '_', header).lower()
+        if h == '':
+            # If previous header was a run, append _cones
+            if last_run:
+                h = f"{last_run}_cones"
+            else:
+                h = 'unnamed'
+        else:
+            # Track the last run header
+            if run_pattern.match(h):
+                last_run = h
+            else:
+                last_run = None
+        sanitized.append(h)
+    return sanitized
+
+def organize_data_into_structured_format(sheet_data, sheet_name):
+    """Organize raw sheet data into a structured format (list of dictionaries)."""
+    if not sheet_data:
+        return []
+    
+    # Santize headers by replacing spaces with underscores and all lowercase
+    headers = sanitize_headers(sheet_data[0])
+    
+    structured_data = []
+    for row in sheet_data[1:]:  # Skip header row
+        if row == []:
+           # break after first row that is empty to avoid processing unnecessary empty rows
+           break
+
+        row_dict = {headers[i]: row[i] if i < len(row) else None for i in range(len(headers))}
+        structured_data.append(row_dict)
+
+    # calculate total runs by finding each dict key that equals 'runs' and pull highest value
+    total_runs = max([int(row.get('runs', 0)) for row in structured_data if 'runs' in row])
+    total_cones = sum([int(row.get('cones', 0)) for row in structured_data if 'cones' in row])
+
+    # append general data at top of structured data list (e.g. event name, date, etc.)
+    event_overview = {
+    "event_name": sheet_name,
+    "total_drivers": len(structured_data),
+    "total_runs": total_runs,
+    "total_cones": total_cones
+    }
+
+    # Cull unnecessary Runs, using total_runs, removed all keys that start with "run_" and are greater than total_runs (e.g. if total_runs is 8, remove run_9, run_10, etc.)
+    for row in structured_data:
+        keys_to_remove = [key for key in row.keys() if key.startswith("run_") and key != "runs" and int(key.split("_")[1]) > total_runs]
+        for key in keys_to_remove:
+            del row[key]
+
+    structured_data.insert(0, event_overview)
+    
+    return structured_data
+
 
 def main():
   """Shows basic usage of the Sheets API.
@@ -93,26 +183,27 @@ def main():
   try:
     service = build("sheets", "v4", credentials=creds)
 
-    # # Get all sheet names
-    # sheet_names = get_all_sheet_names(service, RALLYCROSS_SPREADSHEET_ID)
+    # Get all sheet names
+    sheet_names = get_all_sheet_names(service, RALLYCROSS_SPREADSHEET_ID)
+    sheet_names_2026 = filter_sheets_by_name_keyword(sheet_names, keyword="2026 PE")
     
-    # Call the Sheets API
-    sheet = service.spreadsheets()
-    result = (
-        sheet.values()
-        .get(spreadsheetId=RALLYCROSS_SPREADSHEET_ID, range=RANGE_NAME)
-        .execute()
-    )
-    values = result.get("values", [])
+    for sheet_name in sheet_names_2026:
+      print(f"\nFetching data from tab: '{sheet_name}'")
 
-    if not values:
-      print("No data found.")
-      return
+      filtered_sheet_data = get_filtered_sheet_data(
+         service=service, 
+         spreadsheet_id=RALLYCROSS_SPREADSHEET_ID, 
+         sheet_name=sheet_name, 
+         range_start="B8", 
+         range_end="BF400"
+        )
 
-    print(f"Values from spreadsheet '{RALLYCROSS_SPREADSHEET_ID}', range '{RANGE_NAME}':")
+      sanitized_sheet_name = re.sub(r'[^A-Za-z0-9]+', '_', sheet_name)
+      structured_data = organize_data_into_structured_format(filtered_sheet_data, sheet_name)
 
-    for row in values:
-      print(f"{row}")
+      structured_output_file = root_dir / f"structured_data_{sanitized_sheet_name}.json"
+      with open(structured_output_file, "w") as f:
+          json.dump(structured_data, f, indent=2)
 
 
   except HttpError as err:
