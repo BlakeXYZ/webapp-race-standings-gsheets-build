@@ -1,16 +1,18 @@
 import json
 import re
 
-from logging import root
 import os.path
 import pathlib
 
+from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+load_dotenv()
 
 #TODO: Fetch all sheet names in the spreadsheet, and then fetch data from the correct sheet based on the date of the rallycross event (e.g. if the event is on 3/22/2026, fetch data from the sheet with the name that contains "3/22/2026" or "March 22, 2026") - For your project: Combine #1 (Dynamic Sheet Selection) + #4 (Date-Based Fetching)
 #TODO: Dynamic Range Selection - Count of rows will be dynamic based on number of Racers for that Event
@@ -27,38 +29,46 @@ Values from spreadsheet '1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4', range '#
 ['4', 'Adam West', '03 Subaru WRX Blue', 'AWD', '3', '88.41', '0.23', '8', '85.81', '90.78', '4.97', '707.3', '0', '0', '707.3']
 """
 
+repo_root_dir = pathlib.Path(__file__).parent.parent.parent
 
-
-# If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-
-# The ID and range of a sample spreadsheet.
-RALLYCROSS_SPREADSHEET_ID = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
+SERVICE_ACCOUNT_FILE = repo_root_dir / "webapp-race-standings-f1749623862a.json"
+GSHEET_API_KEY = os.getenv("GSHEET_API_KEY")
+GSHEET_RALLYCROSS_ID = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
 
 #use parent dir of this file as the working dir, so that the credentials.json and token.json files are in the same dir as this file
 root_dir = pathlib.Path(__file__).parent
 
 
 def build_credentials():
-  creds = None
-  # The file token.json stores the user's access and refresh tokens, and is
-  # created automatically when the authorization flow completes for the first
-  # time.
-  if os.path.exists(root_dir / "token.json"):
-    creds = Credentials.from_authorized_user_file(root_dir / "token.json", SCOPES)
+  """
+  Creates and returns Google API credentials, handling token storage and refresh as needed.
+
+  Returns:
+      creds (Credentials): Google API credentials object for authentication.
+  """
+  # creds = None
+  # # The file token.json stores the user's access and refresh tokens, and is
+  # # created automatically when the authorization flow completes for the first
+  # # time.
+  # if os.path.exists(root_dir / "token.json"):
+  #   creds = Credentials.from_authorized_user_file(root_dir / "token.json", SCOPES)
     
-  # If there are no (valid) credentials available, let the user log in.
-  if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request())
-    else:
-      flow = InstalledAppFlow.from_client_secrets_file(
-          root_dir / "credentials.json", SCOPES
-      )
-      creds = flow.run_local_server(port=8080)
-    # Save the credentials for the next run
-    with open(root_dir / "token.json", "w") as token:
-      token.write(creds.to_json())
+  # # If there are no (valid) credentials available, let the user log in.
+  # if not creds or not creds.valid:
+  #   if creds and creds.expired and creds.refresh_token:
+  #     creds.refresh(Request())
+  #   else:
+  #     flow = InstalledAppFlow.from_client_secrets_file(
+  #         root_dir / "credentials.json", SCOPES
+  #     )
+  #     creds = flow.run_local_server(port=8080)
+  #   # Save the credentials for the next run
+  #   with open(root_dir / "token.json", "w") as token:
+  #     token.write(creds.to_json())
+
+  creds = service_account.Credentials.from_service_account_file(
+    SERVICE_ACCOUNT_FILE, scopes=SCOPES)
   
   return creds
 
@@ -181,18 +191,18 @@ def main():
   creds = build_credentials()
 
   try:
-    service = build("sheets", "v4", credentials=creds)
+    service = build("sheets", "v4", credentials=creds, developerKey=GSHEET_API_KEY)
 
     # Get all sheet names
-    sheet_names = get_all_sheet_names(service, RALLYCROSS_SPREADSHEET_ID)
-    sheet_names_2026 = filter_sheets_by_name_keyword(sheet_names, keyword="2026 PE")
+    sheet_names = get_all_sheet_names(service=service, spreadsheet_id=GSHEET_RALLYCROSS_ID, debug=False)
+    sheet_names_2026 = filter_sheets_by_name_keyword(sheet_names=sheet_names, keyword="2026 PE")
     
     for sheet_name in sheet_names_2026:
       print(f"\nFetching data from tab: '{sheet_name}'")
 
       filtered_sheet_data = get_filtered_sheet_data(
          service=service, 
-         spreadsheet_id=RALLYCROSS_SPREADSHEET_ID, 
+         spreadsheet_id=GSHEET_RALLYCROSS_ID, 
          sheet_name=sheet_name, 
          range_start="B8", 
          range_end="BF400"

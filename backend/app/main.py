@@ -2,10 +2,31 @@
 # IMPORTS - Bring in the tools we need
 # ==============================================================================
 
+import logging
 from fastapi import FastAPI                        # Main FastAPI class
 from fastapi.middleware.cors import CORSMiddleware # Allow frontend to call API
 from app.core.config import settings               # Configuration settings
 from app.api.routes import api_router              # All our API routes
+
+# ==============================================================================
+# LOGGING CONFIGURATION
+# ==============================================================================
+
+logging.basicConfig(
+    level=logging.DEBUG,  # Show all logs (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()  # Print to console
+    ]
+)
+
+# Reduce noise from external libraries
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+
+logger = logging.getLogger(__name__)
+logger.info("🚀 Application starting up...")
 
 
 # ==============================================================================

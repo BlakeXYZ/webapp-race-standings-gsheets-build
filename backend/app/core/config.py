@@ -5,8 +5,10 @@
 # Think of this as a central place for all your app's settings
 # ==============================================================================
 
+import os
+
 from pydantic_settings import BaseSettings  # Helps load settings from .env files
-from typing import List                     # For type hints
+from typing import List, Optional                     # For type hints
 
 
 # ==============================================================================
@@ -75,6 +77,14 @@ class Settings(BaseSettings):
     # AWS_ACCESS_KEY: str = ""
     # AWS_SECRET_KEY: str = ""
     # GOOGLE_API_KEY: str = ""
+    
+    # Google Sheets API Configuration
+    GSHEET_API_KEY: Optional[str] = None
+    GOOGLE_API_SCOPES: List[str] = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+    GOOGLE_APPLICATION_CREDENTIALS: Optional[str] = None
+    GSHEET_RALLYCROSS_ID: str = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
+
+
     
     
     # ------------------------------------------------------------------

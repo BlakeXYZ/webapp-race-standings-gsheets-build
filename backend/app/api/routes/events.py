@@ -5,8 +5,14 @@
 # Think of routes as the "pages" of your API
 # ==============================================================================
 
-from fastapi import APIRouter, HTTPException, Query  # FastAPI tools
+from fastapi import APIRouter, Depends, HTTPException, Query  # FastAPI tools
 from typing import List                             # For type hints
+import logging
+
+from app.core.config import settings          
+from app.services.gsheets_api_service import GoogleSheetsService  
+
+logger = logging.getLogger(__name__)
 
 # ==============================================================================
 # CREATE ROUTER - Like a mini-app for this specific feature
@@ -16,6 +22,24 @@ from typing import List                             # For type hints
 
 router = APIRouter()
 
+# ================================================================
+# CREATE SINGLETON - One instance shared across all requests
+# ================================================================
+_sheets_service_instance = None
+
+def get_sheets_service() -> GoogleSheetsService:
+    """
+    Dependency that returns the singleton GoogleSheetsService instance.
+    Cache is preserved across all requests.
+    """
+    global _sheets_service_instance
+    
+    if _sheets_service_instance is None:
+        logger.info("Initializing GoogleSheetsService singleton")
+        _sheets_service_instance = GoogleSheetsService()
+    
+    return _sheets_service_instance
+
 # ==============================================================================
 # ROUTE 1: GET ALL EVENTS
 # ==============================================================================
@@ -24,7 +48,7 @@ router = APIRouter()
 # Returns: List of all race events
 
 @router.get("/")
-async def get_events():
+async def get_events(service: GoogleSheetsService = Depends(get_sheets_service)):
     """
     Get all race events
     
@@ -39,6 +63,8 @@ async def get_events():
     }
     """
 
+    logger.info(f"GET /events called - fetching events from Google Sheets")
+
     events_data = [
         {"id": 1, "name": "Rallycross #73, points event #6", "date": "2024-11-24"},
         {"id": 2, "name": "Rallycross #72, points event #5", "date": "2024-11-03"},
@@ -48,6 +74,12 @@ async def get_events():
         {"id": 6, "name": "Rallycross #68, points event #1", "date": "2024-02-25"},
 
     ]
+
+
+
+    events = service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID, keyword="2026 PE")
+    #log event data for debugging
+    logger.debug(f"Retrieved events: {events}")
 
     # Placeholder for actual data retrieval logic
     return { "events": events_data }
