@@ -77,9 +77,9 @@ class GoogleSheetsService:
         Returns:
             Structured event data with overview and participant records
         """
-        return self._get_cached_or_fetch(spreadsheet_id, event_name)
+        return self._get_cached_or_fetch_sheet_data(spreadsheet_id, event_name)
 
-    def get_all_events(self, spreadsheet_id: str, keyword: str = "2026 PE") -> Dict[str, List[Dict[str, Any]]]:
+    def get_all_events(self, spreadsheet_id: str, keyword: str = "2024 PE") -> Dict[str, List[Dict[str, Any]]]:
         """
         Fetch and cache all events matching a keyword.
         
@@ -94,10 +94,12 @@ class GoogleSheetsService:
             HttpError: If Google Sheets API request fails
         """
         results = {}
+
+        #TODO: evaluate workflow and how best to fetch event data. method making unnecessary api calls if cache exists already?
         
         try:
             # Get all sheet names
-            sheet_names = self._get_sheet_names(spreadsheet_id)
+            sheet_names = self._get_cached_or_fetch_all_sheet_names(spreadsheet_id)
             
             # Filter by keyword
             filtered_names = self._filter_by_keyword(sheet_names, keyword)
@@ -105,7 +107,7 @@ class GoogleSheetsService:
             # Fetch and cache each event
             for event_name in filtered_names:
                 logger.info(f"Fetching event: '{event_name}'")
-                results[event_name] = self._get_cached_or_fetch(spreadsheet_id, event_name)
+                results[event_name] = self._get_cached_or_fetch_sheet_data(spreadsheet_id, event_name)
             
             logger.info(f"Successfully fetched {len(results)} events")
             return results
@@ -125,7 +127,7 @@ class GoogleSheetsService:
         Returns:
             List of event names (sheet/tab titles)
         """
-        sheet_names = self._get_sheet_names(spreadsheet_id)
+        sheet_names = self._get_cached_or_fetch_all_sheet_names(spreadsheet_id)
         
         if keyword:
             return self._filter_by_keyword(sheet_names, keyword)
@@ -158,13 +160,13 @@ class GoogleSheetsService:
             logger.info(f"Cache cleared for event: '{event_name}'")
         
         # Fetch fresh data
-        return self._get_cached_or_fetch(spreadsheet_id, event_name)
+        return self._get_cached_or_fetch_sheet_data(spreadsheet_id, event_name)
 
     # ================================================================
     # PRIVATE - Low-level Google Sheets API operations
     # ================================================================
 
-    def _get_cached_or_fetch(self, spreadsheet_id: str, sheet_name: str) -> List[Dict[str, Any]]:
+    def _get_cached_or_fetch_sheet_data(self, spreadsheet_id: str, sheet_name: str) -> List[Dict[str, Any]]:
         """
         Internal cache lookup and fetch logic.
         
@@ -199,8 +201,39 @@ class GoogleSheetsService:
         
         return data
 
+    def _get_cached_or_fetch_all_sheet_names(self, spreadsheet_id: str) -> List[str]:
+        """
+        Get all sheet names with caching.
+        
+        Args:
+            spreadsheet_id: The Google Sheets spreadsheet ID
+            
+        Returns:
+            List of sheet/tab names (titles) from the spreadsheet
+        """
+        cache_key = f"{spreadsheet_id}:all_sheet_names"
+        
+        # Check cache first
+        if cache_key in self._cache:
+            cached_data = self._cache[cache_key]
+            if datetime.now() < cached_data['expires_at']:
+                logger.debug("Cache hit for all sheet names")
+                return cached_data['data']
+        
+        # Fetch fresh data
+        logger.debug("Cache miss for all sheet names - fetching from API")
+        sheet_names = self._get_all_sheet_names(spreadsheet_id)
+        
+        # Store in cache
+        self._cache[cache_key] = {
+            'data': sheet_names,
+            'expires_at': datetime.now() + timedelta(seconds=self._cache_ttl)
+        }
+        
+        return sheet_names
+
     def _fetch_and_transform(self, spreadsheet_id: str, sheet_name: str, 
-                            range_start: str = "B8", range_end: str = "BF400") -> List[Dict[str, Any]]:
+                            range_start: str = "B8", range_end: str = "BF400") -> Dict[str, Any]:
         """
         Fetch raw data from Google Sheets and transform to structured format.
         
@@ -211,7 +244,7 @@ class GoogleSheetsService:
             range_end: Ending cell (default: "BF400")
             
         Returns:
-            Structured data as list of dictionaries with event overview and participant records
+            Structured data as a dictionary with event overview and participant records
         """
         # Fetch raw 2D array from API
         raw_data = self._fetch_raw_data(
@@ -260,7 +293,7 @@ class GoogleSheetsService:
             logger.error(f"Error fetching data from sheet '{sheet_name}': {err}")
             return []
 
-    def _get_sheet_names(self, spreadsheet_id: str) -> List[str]:
+    def _get_all_sheet_names(self, spreadsheet_id: str) -> List[str]:
         """
         Get all sheet/tab names from a spreadsheet.
         

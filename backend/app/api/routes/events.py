@@ -5,12 +5,15 @@
 # Think of routes as the "pages" of your API
 # ==============================================================================
 
+from asyncio import events
+
 from fastapi import APIRouter, Depends, HTTPException, Query  # FastAPI tools
 from typing import List                             # For type hints
 import logging
 
 from app.core.config import settings          
 from app.services.gsheets_api_service import GoogleSheetsService  
+from app.schemas.events import EventData
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +51,7 @@ def get_sheets_service() -> GoogleSheetsService:
 # Returns: List of all race events
 
 @router.get("/")
-async def get_events(service: GoogleSheetsService = Depends(get_sheets_service)):
+async def get_events(gsheet_service: GoogleSheetsService = Depends(get_sheets_service)):
     """
     Get all race events
     
@@ -77,9 +80,34 @@ async def get_events(service: GoogleSheetsService = Depends(get_sheets_service))
 
 
 
-    events = service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID, keyword="2026 PE")
-    #log event data for debugging
-    logger.debug(f"Retrieved events: {events}")
+    # events = gsheet_service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID, keyword="2026 PE")
+    # #log event data for debugging
+    # # logger.debug(f"Retrieved events: {events}")
+
+    # get all cached sheet names or fetch them
+    all_events = gsheet_service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID)
+
+    events_data = []
+
+    # logger debug all event info:
+    logger.debug(f"----------- Retrieved events count = {len(all_events)}")
+    for idx, (event_name, raw_event_data) in enumerate(all_events.items()):
+
+        event_data = EventData.model_validate(raw_event_data)
+        logger.debug(f"Event: {event_name}")
+        logger.debug(f"  Overview Dict: {event_data.event_overview}")
+        logger.debug(f"  Overview Event Name: {event_data.event_overview.event_name_shorthand}")
+
+        full_event_name = f"Rallycross {event_data.event_overview.event_number}, {event_data.event_overview.event_type}"
+
+        events_data.append({
+            "id": idx + 1,
+            "name": full_event_name,
+            "date": event_data.event_overview.event_date
+        })
+
+
+  
 
     # Placeholder for actual data retrieval logic
     return { "events": events_data }

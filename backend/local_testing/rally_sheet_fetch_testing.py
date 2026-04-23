@@ -12,6 +12,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.parent))
+
+
+from app.services.gsheets_data_mapper import sanitize_headers, organize_data_into_structured_format, parse_sheet_name
+
 load_dotenv()
 
 #TODO: Fetch all sheet names in the spreadsheet, and then fetch data from the correct sheet based on the date of the rallycross event (e.g. if the event is on 3/22/2026, fetch data from the sheet with the name that contains "3/22/2026" or "March 22, 2026") - For your project: Combine #1 (Dynamic Sheet Selection) + #4 (Date-Based Fetching)
@@ -123,65 +130,65 @@ def get_filtered_sheet_data(service, spreadsheet_id, sheet_name, range_start="B8
         print(f"Error fetching data from sheet '{sheet_name}': {err}")
         return []
 
-def sanitize_headers(headers):
-    sanitized = []
-    last_run = None
-    run_pattern = re.compile(r'^run_(\d+)$')
-    for header in headers:
-        h = re.sub(r'[^A-Za-z0-9]+', '_', header).lower()
-        if h == '':
-            # If previous header was a run, append _cones
-            if last_run:
-                h = f"{last_run}_cones"
-            else:
-                h = 'unnamed'
-        else:
-            # Track the last run header
-            if run_pattern.match(h):
-                last_run = h
-            else:
-                last_run = None
-        sanitized.append(h)
-    return sanitized
+# def sanitize_headers(headers):
+#     sanitized = []
+#     last_run = None
+#     run_pattern = re.compile(r'^run_(\d+)$')
+#     for header in headers:
+#         h = re.sub(r'[^A-Za-z0-9]+', '_', header).lower()
+#         if h == '':
+#             # If previous header was a run, append _cones
+#             if last_run:
+#                 h = f"{last_run}_cones"
+#             else:
+#                 h = 'unnamed'
+#         else:
+#             # Track the last run header
+#             if run_pattern.match(h):
+#                 last_run = h
+#             else:
+#                 last_run = None
+#         sanitized.append(h)
+#     return sanitized
 
-def organize_data_into_structured_format(sheet_data, sheet_name):
-    """Organize raw sheet data into a structured format (list of dictionaries)."""
-    if not sheet_data:
-        return []
+# def organize_data_into_structured_format(sheet_data, sheet_name):
+#     """Organize raw sheet data into a structured format (list of dictionaries)."""
+#     if not sheet_data:
+#         return []
     
-    # Santize headers by replacing spaces with underscores and all lowercase
-    headers = sanitize_headers(sheet_data[0])
+#     # Santize headers by replacing spaces with underscores and all lowercase
+#     headers = sanitize_headers(sheet_data[0])
     
-    structured_data = []
-    for row in sheet_data[1:]:  # Skip header row
-        if row == []:
-           # break after first row that is empty to avoid processing unnecessary empty rows
-           break
+#     structured_data = []
+#     for row in sheet_data[1:]:  # Skip header row
+#         if row == []:
+#            # break after first row that is empty to avoid processing unnecessary empty rows
+#            break
 
-        row_dict = {headers[i]: row[i] if i < len(row) else None for i in range(len(headers))}
-        structured_data.append(row_dict)
+#         row_dict = {headers[i]: row[i] if i < len(row) else None for i in range(len(headers))}
+#         structured_data.append(row_dict)
 
-    # calculate total runs by finding each dict key that equals 'runs' and pull highest value
-    total_runs = max([int(row.get('runs', 0)) for row in structured_data if 'runs' in row])
-    total_cones = sum([int(row.get('cones', 0)) for row in structured_data if 'cones' in row])
+#     # calculate total runs by finding each dict key that equals 'runs' and pull highest value
+#     total_runs = max([int(row.get('runs', 0)) for row in structured_data if 'runs' in row])
+#     total_cones = sum([int(row.get('cones', 0)) for row in structured_data if 'cones' in row])
 
-    # append general data at top of structured data list (e.g. event name, date, etc.)
-    event_overview = {
-    "event_name": sheet_name,
-    "total_drivers": len(structured_data),
-    "total_runs": total_runs,
-    "total_cones": total_cones
-    }
+#     # append general data at top of structured data list (e.g. event name, date, etc.)
+#     event_overview = {
+#     "event_name": sheet_name,
+#     "total_drivers": len(structured_data),
+#     "total_runs": total_runs,
+#     "total_cones": total_cones
+#     }
 
-    # Cull unnecessary Runs, using total_runs, removed all keys that start with "run_" and are greater than total_runs (e.g. if total_runs is 8, remove run_9, run_10, etc.)
-    for row in structured_data:
-        keys_to_remove = [key for key in row.keys() if key.startswith("run_") and key != "runs" and int(key.split("_")[1]) > total_runs]
-        for key in keys_to_remove:
-            del row[key]
+#     # Cull unnecessary Runs, using total_runs, removed all keys that start with "run_" and are greater than total_runs (e.g. if total_runs is 8, remove run_9, run_10, etc.)
+#     for row in structured_data:
+#         keys_to_remove = [key for key in row.keys() if key.startswith("run_") and key != "runs" and int(key.split("_")[1]) > total_runs]
+#         for key in keys_to_remove:
+#             del row[key]
 
-    structured_data.insert(0, event_overview)
+#     structured_data.insert(0, event_overview)
     
-    return structured_data
+#     return structured_data
 
 
 def main():
