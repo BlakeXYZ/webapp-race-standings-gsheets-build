@@ -178,3 +178,13 @@ settings = Settings()
 # IMPORTANT: Never commit .env to git! (already in .gitignore)
 # ==============================================================================
 
+
+def load_secret_from_file(value):
+    if value and os.path.exists(value):
+        with open(value, 'r') as f:
+            return f.read().strip()
+    return value
+
+# Read secrets from file paths if they exist (for Docker secrets)
+if settings.GSHEET_API_KEY:
+    settings.GSHEET_API_KEY = load_secret_from_file(settings.GSHEET_API_KEY)

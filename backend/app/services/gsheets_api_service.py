@@ -79,7 +79,7 @@ class GoogleSheetsService:
         """
         return self._get_cached_or_fetch_sheet_data(spreadsheet_id, event_name)
 
-    def get_all_events(self, spreadsheet_id: str, keyword: str = "2024 PE") -> Dict[str, List[Dict[str, Any]]]:
+    def get_all_events(self, spreadsheet_id: str, keyword: str = "2026 PE") -> Dict[str, List[Dict[str, Any]]]:
         """
         Fetch and cache all events matching a keyword.
         

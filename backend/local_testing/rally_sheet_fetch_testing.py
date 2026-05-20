@@ -39,7 +39,7 @@ Values from spreadsheet '1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4', range '#
 repo_root_dir = pathlib.Path(__file__).parent.parent.parent
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-SERVICE_ACCOUNT_FILE = repo_root_dir / "webapp-race-standings-f1749623862a.json"
+SERVICE_ACCOUNT_FILE = repo_root_dir / "gservice_acct_webapp-race-standings.json"
 GSHEET_API_KEY = os.getenv("GSHEET_API_KEY")
 GSHEET_RALLYCROSS_ID = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
 

@@ -49,8 +49,9 @@ services:
       - GIT_COMMIT_HASH=${GIT_COMMIT_HASH:-unknown}
       
       # Google Sheets API credentials
-      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/gsheets_credentials
-      
+      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/gservice_acct_webapp-race-standings 
+      - GSHEET_API_KEY=/run/secrets/gsheet_api_key
+
       # STUB: Add when you need authentication
       # - SECRET_KEY=${SECRET_KEY}
       # - ALGORITHM=HS256
@@ -89,7 +90,8 @@ services:
     
     # Docker secrets for sensitive credentials
     secrets:
-      - gsheets_credentials
+      - gservice_acct_webapp-race-standings # Must be created on VPS before deployment
+      - gsheet_api_key 
 
 
   # ----------------------------------------------------------------------------
@@ -156,7 +158,9 @@ networks:
 # SECRETS - Secure credential management
 # ==============================================================================
 secrets:
-  gsheets_credentials:
+  gservice_acct_webapp-race-standings:
+    external: true  # Must be created on VPS before deployment
+  gsheet_api_key:
     external: true  # Must be created on VPS before deployment
 
 # STUB: Add more secrets when you need authentication or external services
@@ -181,9 +185,10 @@ secrets:
 #    docker stack deploy -c traefik-compose.yml traefik-stack
 #
 # 4. Create Docker secrets:
-#    docker secret create gsheets_credentials ./webapp-race-standings-f1749623862a.json
+#    docker secret create gservice_acct_webapp-race-standings ./gservice_acct_webapp-race-standings.json
 #    
 #    STUB: Create additional secrets (when needed):
+#    docker secret create secret_file ./secret_file.json
 #    printf "your-secret-key" | docker secret create jwt-secret -
 #    printf "sk_live_..." | docker secret create stripe-api-key -
 #
