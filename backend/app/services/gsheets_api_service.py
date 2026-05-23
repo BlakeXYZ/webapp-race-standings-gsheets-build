@@ -48,6 +48,12 @@ class GoogleSheetsService:
     """
 
     def __init__(self):
+        if not settings.GOOGLE_APPLICATION_CREDENTIALS:
+            raise ValueError("Google application credentials not configured. Please set GOOGLE_APPLICATION_CREDENTIALS in environment variables or config.")
+        
+        if not settings.GSHEET_API_KEY:
+            raise ValueError("Google Sheets API key not configured. Please set GSHEET_API_KEY in environment variables or config.")
+
         self.credentials = service_account.Credentials.from_service_account_file(
             settings.GOOGLE_APPLICATION_CREDENTIALS,
             scopes=settings.GOOGLE_API_SCOPES

@@ -34,7 +34,8 @@ export default function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </li>
-            <li><Link to="/standings" className="hover:text-blue-400 transition-colors">Standings</Link></li>
+            {/* =========== Temporarily Disabled */}
+            {/* <li><Link to="/standings" className="hover:text-blue-400 transition-colors">Standings</Link></li> */}
             <li><Link to="/about" className="hover:text-blue-400 transition-colors">About</Link></li>
             <li><ModeToggle /></li>
             
@@ -60,9 +61,11 @@ export default function Header() {
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
 
-              <DropdownMenuItem asChild>
+
+              {/* =========== Temporarily Disabled */}
+              {/* <DropdownMenuItem asChild>
                 <Link to="/standings" className='cursor-pointer'>Standings</Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
 
               <DropdownMenuItem asChild>
                 <Link to="/about" className='cursor-pointer'>About</Link>

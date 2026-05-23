@@ -88,18 +88,23 @@ export default function HomePage() {
               {/* Link Button - Navigate to /standings page */}
               {/* to="/standings" is like href in <a> tag, but doesn't reload page */}
               {/* mt-auto pushes this to the bottom, self-start prevents stretching to full width */}
-              <Link 
+              
+              {/* =========== Temporarily Disabled */}
+              {/* <Link 
                 to="/standings" 
                 className="inline-block 
-
                 bg-blue-500 hover:bg-blue-600  
                 dark:bg-blue-800 dark:hover:bg-blue-900
-
-
                 text-white px-4 py-2 rounded-lg transition-colors mt-auto self-start"
               >
                 View Standings →
-              </Link>
+              </Link> */}
+              {/* ===========*/}
+
+              <div className="inline-block bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400 px-4 py-2 rounded-lg mt-auto self-start cursor-not-allowed">
+              Coming Soon
+              </div>      
+                  
             </CardContent>
           </Card>
 

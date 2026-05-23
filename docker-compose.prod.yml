@@ -50,7 +50,7 @@ services:
       
       # Google Sheets API credentials
       - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/gservice_acct_webapp-race-standings 
-      - GSHEET_API_KEY=/run/secrets/gsheet_api_key
+      - GSHEET_API_KEY=/run/secrets/gsheet_api_key_webapp-race-standings 
 
       # STUB: Add when you need authentication
       # - SECRET_KEY=${SECRET_KEY}
@@ -91,7 +91,7 @@ services:
     # Docker secrets for sensitive credentials
     secrets:
       - gservice_acct_webapp-race-standings # Must be created on VPS before deployment
-      - gsheet_api_key 
+      - gsheet_api_key_webapp-race-standings # Must be created on VPS before deployment
 
 
   # ----------------------------------------------------------------------------
@@ -160,7 +160,7 @@ networks:
 secrets:
   gservice_acct_webapp-race-standings:
     external: true  # Must be created on VPS before deployment
-  gsheet_api_key:
+  gsheet_api_key_webapp-race-standings:
     external: true  # Must be created on VPS before deployment
 
 # STUB: Add more secrets when you need authentication or external services
@@ -186,7 +186,7 @@ secrets:
 #
 # 4. Create Docker secrets:
 #    docker secret create gservice_acct_webapp-race-standings ./gservice_acct_webapp-race-standings.json
-#    
+#    docker secret create gsheet_api_key_webapp-race-standings ./gsheet_api_key_webapp-race-standings.json
 #    STUB: Create additional secrets (when needed):
 #    docker secret create secret_file ./secret_file.json
 #    printf "your-secret-key" | docker secret create jwt-secret -

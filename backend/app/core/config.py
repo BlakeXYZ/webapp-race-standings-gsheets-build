@@ -82,7 +82,10 @@ class Settings(BaseSettings):
     GSHEET_API_KEY: Optional[str] = None
     GOOGLE_API_SCOPES: List[str] = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
     GOOGLE_APPLICATION_CREDENTIALS: Optional[str] = None
-    GSHEET_RALLYCROSS_ID: str = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
+    # GSHEET_RALLYCROSS_ID: str = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
+    GSHEET_RALLYCROSS_ID: str = "1cTXVoRXgWbgwh8uP-pchAbzf8FRjtRuyR7x_JwLrBHA"
+
+    
 
 
     
