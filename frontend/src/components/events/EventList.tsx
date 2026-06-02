@@ -164,7 +164,7 @@ export default function EventList() {
               // Modern hover effects: border, shadow, and slight scale
               <Link
                 key={event.id}  // React needs a unique "key" for each item in a loop
-                to={`/events/${event.date}`}  // Navigate to individual event page (to be created)
+                to={`/events/${event.date}`}  // Navigate to individual event page 
                 className="group gap-8 flex items-stretch justify-between p-4 rounded-lg 
                 
                 border border-l-8 border-l-blue-500 dark:border-l-blue-600

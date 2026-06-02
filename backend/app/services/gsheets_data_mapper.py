@@ -1,6 +1,9 @@
 # backend/app/services/gsheets_data_mapper.py
 import re
+import logging
 from typing import List, Dict, Any
+
+logger = logging.getLogger(__name__)
 
 def sanitize_headers(headers: List[str]) -> List[str]:
     """Sanitize column headers to be valid Python identifiers."""
@@ -51,7 +54,15 @@ def parse_sheet_name(sheet_name: str) -> Dict[str, Any]:
     components = re.split(r'\s+', sheet_name.strip())
     if len(components) >= 3:
         event_number = components[0]
-        event_date = components[1]
+        # convert date from "3/22/2026" to "2026-03-22" for better formatting and consistency
+        # if date component is in format "3/22/2026", convert to "2026-03-22"
+        date_match = re.match(r'(\d{1,2})/(\d{1,2})/(\d{4})', components[1])
+        if date_match:
+            month, day, year = date_match.groups()
+            event_date = f"{year}-{int(month):02d}-{int(day):02d}"
+        else:
+            logger.warning(f"Date format in sheet name '{sheet_name}' does not match expected format 'M/D/YYYY'")
+            event_date = components[1]
         event_type = components[2]
 
     # if event type contains "PE", refrmat to be more user friendly (e.g. "PE1" becomes "Points Event 1")
@@ -93,7 +104,20 @@ def organize_data_into_structured_format(sheet_data: List[List[str]], sheet_name
         }
     """
     if not sheet_data:
-        return []
+        return {
+            "event_overview": {
+                "event_name_shorthand": None,
+                "total_drivers": 0,
+                "total_runs": 0,
+                "total_cones": 0,
+                "event_number": None,
+                "event_date": None,
+                "event_type": None
+            },
+            "drivers_by_overall": {},
+            "drivers_by_name": {}
+        }
+
     
     # Sanitize headers by replacing spaces with underscores and all lowercase
     headers = sanitize_headers(sheet_data[0])

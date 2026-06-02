@@ -64,13 +64,14 @@ class GoogleSheetsService:
             developerKey=settings.GSHEET_API_KEY
         )
         self._cache: Dict[str, Dict[str, Any]] = {}
+        self._date_index: Dict[str, str] = {}  # Maps event_date to cache_key for quick lookup
         self._cache_ttl: int = 300  # 5 minutes (cache TTL)
 
     # ================================================================
     # PUBLIC API - High-level methods for event operations
     # ================================================================
 
-    def get_event(self, spreadsheet_id: str, event_name: str) -> List[Dict[str, Any]]:
+    def get_event(self, spreadsheet_id: str, event_name: str) -> Dict[str, Any]:
         """
         Get a specific event by exact sheet name.
         
@@ -84,8 +85,35 @@ class GoogleSheetsService:
             Structured event data with overview and participant records
         """
         return self._get_cached_or_fetch_sheet_data(spreadsheet_id, event_name)
+    
+    def get_event_by_date(self, spreadsheet_id: str, event_date: str) -> Optional[Dict[str, Any]]:
+        """Get event details by event date using direct date index lookup."""
 
-    def get_all_events(self, spreadsheet_id: str, keyword: str = "2026 PE") -> Dict[str, List[Dict[str, Any]]]:
+        # Check date index first
+        cache_key = self._date_index.get(event_date)
+        if cache_key and cache_key in self._cache:
+            cached = self._cache[cache_key]
+            if datetime.now() < cached['expires_at']:
+                logger.debug(f"Found event in cache for date '{event_date}': {cache_key}")
+                logger.debug(f"cached data overview: {cached['data'].get('event_overview')}")
+                cache_data: Dict[str, Any] = cached['data']
+                return cache_data   
+                
+        # Not in cache - fetch all events to populate cache
+        logger.info(f"Event not in cache for date '{event_date}' - fetching all events")
+        self.get_all_events(spreadsheet_id=spreadsheet_id)
+        
+        # Try again after fetching
+        cache_key = self._date_index.get(event_date)
+        if cache_key and cache_key in self._cache:
+            cached = self._cache[cache_key]
+            return cached['data']
+        
+        # Still not found - doesn't exist
+        logger.warning(f"Event not found for date '{event_date}' after fetching all events")
+        return None
+
+    def get_all_events(self, spreadsheet_id: str, keyword: str = "2026 PE") -> Dict[str, Dict[str, Any]]:
         """
         Fetch and cache all events matching a keyword.
         
@@ -145,9 +173,10 @@ class GoogleSheetsService:
         Clear the entire cache to force fresh data on next fetch.
         """
         self._cache.clear()
+        self._date_index.clear()
         logger.info("Cache cleared")
 
-    def refresh_event(self, spreadsheet_id: str, event_name: str) -> List[Dict[str, Any]]:
+    def refresh_event(self, spreadsheet_id: str, event_name: str) -> Dict[str, Any]:
         """
         Force refresh of a specific event, bypassing cache.
         
@@ -172,7 +201,7 @@ class GoogleSheetsService:
     # PRIVATE - Low-level Google Sheets API operations
     # ================================================================
 
-    def _get_cached_or_fetch_sheet_data(self, spreadsheet_id: str, sheet_name: str) -> List[Dict[str, Any]]:
+    def _get_cached_or_fetch_sheet_data(self, spreadsheet_id: str, sheet_name: str) -> Dict[str, Any]:
         """
         Internal cache lookup and fetch logic.
         
@@ -184,7 +213,7 @@ class GoogleSheetsService:
             sheet_name: The name/title of the specific sheet/tab
             
         Returns:
-            Structured data as list of dictionaries (cached or fresh)
+            Structured data as a dictionary with event overview and participant records (cached or fresh)
         """
         cache_key = f"{spreadsheet_id}:{sheet_name}"
         
@@ -204,6 +233,12 @@ class GoogleSheetsService:
             'data': data,
             'expires_at': datetime.now() + timedelta(seconds=self._cache_ttl)
         }
+
+        # Add to date index if event_date is available in overview
+        if 'event_overview' in data :
+            event_date = data['event_overview'].get('event_date')
+            if event_date:
+                self._date_index[event_date] = cache_key
         
         return data
 

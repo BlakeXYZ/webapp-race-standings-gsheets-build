@@ -13,7 +13,7 @@ import logging
 
 from app.core.config import settings          
 from app.services.gsheets_api_service import GoogleSheetsService  
-from app.schemas.events import EventData
+from app.schemas.events import EventData, EventOverview
 
 logger = logging.getLogger(__name__)
 
@@ -65,24 +65,7 @@ async def get_events(gsheet_service: GoogleSheetsService = Depends(get_sheets_se
         ]
     }
     """
-
     logger.info(f"GET /events called - fetching events from Google Sheets")
-
-    events_data = [
-        {"id": 1, "name": "Rallycross #73, points event #6", "date": "2024-11-24"},
-        {"id": 2, "name": "Rallycross #72, points event #5", "date": "2024-11-03"},
-        {"id": 3, "name": "Rallycross #71, points event #4", "date": "2024-09-29"},
-        {"id": 4, "name": "Rallycross #70, points event #3", "date": "2024-06-30"},
-        {"id": 5, "name": "Rallycross #69, points event #2", "date": "2024-06-09"},
-        {"id": 6, "name": "Rallycross #68, points event #1", "date": "2024-02-25"},
-
-    ]
-
-
-
-    # events = gsheet_service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID, keyword="2026 PE")
-    # #log event data for debugging
-    # # logger.debug(f"Retrieved events: {events}")
 
     # get all cached sheet names or fetch them
     all_events = gsheet_service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID)
@@ -96,6 +79,8 @@ async def get_events(gsheet_service: GoogleSheetsService = Depends(get_sheets_se
         event_data = EventData.model_validate(raw_event_data)
         logger.debug(f"Event: {event_name}")
         logger.debug(f"  Overview Dict: {event_data.event_overview}")
+        # example overview dict:
+        # Overview Dict: event_name_shorthand='#76 5/17/2026 PE3' total_drivers=15 total_runs=8 total_cones=16 event_number='#76' event_date='5/17/2026' event_type='Points Event #3'
         logger.debug(f"  Overview Event Name: {event_data.event_overview.event_name_shorthand}")
 
         full_event_name = f"Rallycross {event_data.event_overview.event_number}, {event_data.event_overview.event_type}"
@@ -106,8 +91,6 @@ async def get_events(gsheet_service: GoogleSheetsService = Depends(get_sheets_se
             "date": event_data.event_overview.event_date
         })
 
-
-  
 
     # Placeholder for actual data retrieval logic
     return { "events": events_data }
@@ -121,7 +104,10 @@ async def get_events(gsheet_service: GoogleSheetsService = Depends(get_sheets_se
 # URL Parameter: event_date (the date in the URL)
 # Returns: Details for one specific event
 @router.get("/{event_date}")
-async def get_event_by_date(event_date: str):
+async def get_event_by_date(
+    event_date: str,
+    gsheet_service: GoogleSheetsService = Depends(get_sheets_service)
+):
     """
     Get event details by date
     
@@ -133,31 +119,19 @@ async def get_event_by_date(event_date: str):
     }
     """
     
-    # ------------------------------------------------------------------
-    # MOCK DATA - Replace this with database query
-    # ------------------------------------------------------------------
-    # Currently returning fake data for demonstration
-    # STUB: Replace with actual database query
-    # Example with database:
-    # from app.models import Event
-    # event = await Event.get_by_date(event_date)
-    # if not event:
-    #     raise HTTPException(status_code=404, detail="Event not found")
-    # return {"event": event}
-    
-    # Use the same events_data as in get_events
-    events_data = [
-        {"id": 1, "name": "Rallycross #73, points event #6", "date": "2024-11-24"},
-        {"id": 2, "name": "Rallycross #72, points event #5", "date": "2024-11-03"},
-        {"id": 3, "name": "Rallycross #71, points event #4", "date": "2024-09-29"},
-        {"id": 4, "name": "Rallycross #70, points event #3", "date": "2024-06-30"},
-        {"id": 5, "name": "Rallycross #69, points event #2", "date": "2024-06-09"},
-        {"id": 6, "name": "Rallycross #68, points event #1", "date": "2024-02-25"},
-    ]
+    raw_event_data = gsheet_service.get_event_by_date(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID, event_date=event_date)
 
-    # Find event by date
-    event = next((e for e in events_data if e["date"] == event_date), None)
-    if not event:
-        raise HTTPException(status_code=404, detail="Event not found")
+    # Validate and return
+    event_data = EventData.model_validate(raw_event_data)
     
-    return {"event": event}
+    logger.debug(f"Found event: {event_data.event_overview.event_name_shorthand}")
+    
+    return {
+        "event": {
+            "name": f"Rallycross {event_data.event_overview.event_number}, {event_data.event_overview.event_type}",
+            "date": event_data.event_overview.event_date,  # "2026-05-17"
+            "overview": event_data.event_overview,
+            "drivers_by_overall": event_data.drivers_by_overall,
+            "drivers_by_name": event_data.drivers_by_name
+        }
+    }
