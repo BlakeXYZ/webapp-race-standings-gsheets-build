@@ -12,17 +12,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useParams } from "react-router-dom";
 
 
+
+// Import our EventList component - handles event fetching and display
+// This keeps HomePage.tsx clean by separating event logic into its own file
+import DriverCard from '@/components/event_details_page/DriverCard'
+
+
 // ============================================================================
 // DATA TYPES - Defining what our data looks like (optional but helpful)
 // ============================================================================
 
 // This is like a schema - it says each standing has these 3 properties
 // Think of it as documentation for what data structure we expect
-interface EventDetail {
-  name: string    // Event name
-  date: string      // Event date
-}
 
+import { EventDetail } from '@/types/event'
 
 // ============================================================================
 // EVENT DETAILS PAGE COMPONENT - Displays race standings
@@ -31,13 +34,12 @@ interface EventDetail {
 export default function EventDetailsPage() {
 
     
-    
-  // ------------------------------------------------------------------
+  // -----------------------------------------------------------------
   // STATE VARIABLES - Think of these like regular variables, but when
   // they change, the page automatically updates to show the new value
   // ------------------------------------------------------------------
 
-  const { event_date } = useParams();
+  const { event_date } = useParams<{ event_date: string }>()
   
   // standings: holds array of driver data
   // setStandings: function to update standings (like standings = newValue)
@@ -67,20 +69,20 @@ export default function EventDetailsPage() {
         // API URL: In dev uses proxy, in production uses env variable
         const apiUrl = import.meta.env.VITE_API_URL 
           ? `${import.meta.env.VITE_API_URL}/api/v1/events/${event_date}`
-          : `/api/v1/events/${event_date}/`
+          : `/api/v1/events/${event_date}`
         
         // Call the backend API (like using fetch() in vanilla JS)
         const response = await fetch(apiUrl)
         
         // Check if request was successful
         if (!response.ok) {
-          throw new Error('Failed to fetch standings')
+          throw new Error('Failed to fetch event details')
         }
         
         // Convert response to JSON (same as vanilla JS)
         const data = await response.json()
 
-        // Update the standings variable with the data we got
+        // Update the eventDetails variable with the data we got
         setEventDetails(data.event)
 
         // We're done loading
@@ -113,14 +115,39 @@ export default function EventDetailsPage() {
     <div className="max-w-4xl mx-auto">
         
         {/* PAGE TITLE */}
-        <h1 className="text-4xl font-bold text-center mb-8 text-slate-900 dark:text-slate-100">
-          Event Details Page Title
-          {/* STUB: Customize title text here */}
-        </h1>
+
+
+          {/* CONDITIONAL RENDERING - Show different things based on state */}
+          
+          {/* If loading is true, show "Loading..." */}
+          {loading && (
+            <p className="text-center text-slate-600 dark:text-slate-400">Loading...</p>
+          )}
+          
+          {/* If there's an error, show the error message */}
+          {/* The {error} puts the error text inside the paragraph */}
+          {error && (
+            <p className="text-center text-red-600 dark:text-red-400">Error: {error}</p>
+          )}
+
+
+          {!loading && !error && eventDetails && (
+            <>
+              <h1 className="text-4xl font-bold text-center mb-2 text-slate-900 dark:text-slate-100">
+                {eventDetails.name}
+              </h1>
+              <h2 className="text-2xl font-light text-center mb-8 text-slate-900 dark:text-slate-100">
+                {eventDetails.date}
+              </h2>
+            </>
+          )}
+
+
+
         
         {/* CARD COMPONENT - Just a fancy styled box */}
+        {false && (
         <Card>
-          
           {/* CARD HEADER */}
           <CardHeader>
             <CardTitle>Event Details</CardTitle>
@@ -145,7 +172,7 @@ export default function EventDetailsPage() {
             )}
             
             {/* If NOT loading and NO error, show the standings */}
-            {!loading && !error && (
+            {!loading && !error && eventDetails && (
               <div className="space-y-3 text-center">
                 <p className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">{eventDetails.name}</p>
                 <p className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">{eventDetails.date}</p>
@@ -155,16 +182,25 @@ export default function EventDetailsPage() {
     
               </div>
             )}
-            
           </CardContent>
         </Card>
-        
+        )}
+
+
+        {/* DRIVER STANDINGS */}
+        {!loading && !error && eventDetails && (
+          <div>
+            {Object.values(eventDetails.drivers_by_overall).map((driverData) => (
+              <DriverCard key={driverData.overall} driver={driverData} />
+            ))}
+          </div>
+        )}
+
+
         {/* STUB: Add more cards/sections below */}
         {/* Example: Recent races, upcoming events, etc. */}
         
+
     </div>
   )
-
-
-
 }
