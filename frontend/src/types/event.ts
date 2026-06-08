@@ -20,9 +20,16 @@ export interface Driver {
   class: string
   class_rank: string
   avg_time: string
-  total_time: string
+  differential: string
   runs: string
+  min: string
+  max: string
+  min_max_diff: string
+  raw_time: string
   cones: string
   penalty: string
+  total_time: string
   // ... all fields
 }
+
+

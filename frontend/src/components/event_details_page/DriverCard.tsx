@@ -40,49 +40,92 @@ export default function DriverCard({ driver }: DriverCardProps) {
           </div>
           <div className="flex flex-col items-end gap-1">
             <span className="text-2xl font-bold">#{driver.overall}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              {driver.class} #{driver.class_rank}
+            </span>
           </div>
         </div>
       </CardHeader>
       
       <CardContent className="pb-3">
-        {/* Always visible info */}
-        <div className="grid grid-cols-2 gap-2 text-sm">
+        {/* ALWAYS VISIBLE - Key Performance Stats */}
+        <div className="grid grid-cols-2 gap-3 text-sm mb-2">
+          {/* Most important - Avg Time */}
           <div>
-            <p className="text-slate-500 dark:text-slate-400">Class</p>
-            <p className="font-semibold">{driver.class}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs">Average Time</p>
+            <p className="font-bold text-lg">{driver.avg_time}s</p>
           </div>
+          
+          {/* Context - Differential */}
           <div>
-            <p className="text-slate-500 dark:text-slate-400">Total Time</p>
-            <p className="font-semibold">{driver.total_time}s</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs">Behind Leader</p>
+            <p className="font-semibold text-lg">
+              {driver.differential ? `+${driver.differential}s` : '--'}
+            </p>
           </div>
 
+
+          <div>
+            <p className="text-slate-500 dark:text-slate-400 text-xs">Runs</p>
+            <p className="font-semibold">{driver.runs}</p>
+          </div>
           
+
+          {/* Quick penalty indicator */}
+          <div>
+            <p className="text-slate-500 dark:text-slate-400 text-xs">Cones Hit</p>
+            <p className="font-semibold">
+              {driver.cones}
+            </p>
+          </div>
+
         </div>
 
         {/* Expandable section */}
         {isExpanded && (
-          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 animate-in fade-in duration-200">
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">
+              Detailed Stats
+            </h4>
+            
             <div className="grid grid-cols-2 gap-4 text-sm">
+              {/* Consistency */}
+
               <div>
-                <p className="text-slate-500 dark:text-slate-400">Average Time</p>
-                <p className="font-semibold">{driver.avg_time}s</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs">Best Run</p>
+                <p className="font-semibold text-green-600 dark:text-green-400">
+                  {driver.min}s
+                </p>
               </div>
+
               <div>
-                <p className="text-slate-500 dark:text-slate-400">Cones Hit</p>
-                <p className="font-semibold">{driver.cones}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs">Worst Run</p>
+                <p className="font-semibold">{driver.max}s</p>
               </div>
+
               <div>
-                <p className="text-slate-500 dark:text-slate-400">Penalty</p>
-                <p className="font-semibold">{driver.penalty}s</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs">Min Max Diff</p>
+                <p className="font-semibold">{driver.min_max_diff}s</p>
               </div>
+
               <div>
-                <p className="text-slate-500 dark:text-slate-400">Total Runs</p>
-                <p className="font-semibold">{driver.runs}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs">Penalty Time</p>
+                <p className={`font-semibold ${driver.penalty > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
+                  {driver.penalty}s
+                </p>
               </div>
+
               <div>
-                <p className="text-slate-500 dark:text-slate-400">Class Rank</p>
-                <p className="font-semibold">#{driver.class_rank}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs">Raw Time</p>
+                <p className="font-semibold">{driver.raw_time}s</p>
               </div>
+
+
+              <div>
+                <p className="text-slate-500 dark:text-slate-400 text-xs">Total Time</p>
+                <p className="font-semibold">{driver.total_time}s</p>
+              </div>
+              
             </div>
           </div>
         )}

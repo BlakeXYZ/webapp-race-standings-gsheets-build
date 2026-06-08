@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useParams } from "react-router-dom";
 
 
-
 // Import our EventList component - handles event fetching and display
 // This keeps HomePage.tsx clean by separating event logic into its own file
 import DriverCard from '@/components/event_details_page/DriverCard'
@@ -21,11 +20,16 @@ import DriverCard from '@/components/event_details_page/DriverCard'
 // ============================================================================
 // DATA TYPES - Defining what our data looks like (optional but helpful)
 // ============================================================================
-
 // This is like a schema - it says each standing has these 3 properties
 // Think of it as documentation for what data structure we expect
-
 import { EventDetail } from '@/types/event'
+
+
+// ============================================================================
+// API FUNCTIONS - These are the functions that talk to our backend API
+// ============================================================================
+import { fetchEventByDate } from '@/services/api'
+
 
 // ============================================================================
 // EVENT DETAILS PAGE COMPONENT - Displays race standings
@@ -39,8 +43,16 @@ export default function EventDetailsPage() {
   // they change, the page automatically updates to show the new value
   // ------------------------------------------------------------------
 
-  const { event_date } = useParams<{ event_date: string }>()
+  //  Inside App.tsx:
+  // <Route path="/events/:event_date" element={<EventDetailsPage />} />
+  // //                    ^^^^^^^^^^^
+  // //                    This defines the parameter name
   
+  const { event_date } = useParams<{ event_date: string }>()
+  //      ^^^^^^^^^^^                ^^^^^^^^^^^
+  //      Variable name              Type annotation
+  //      (must match route)         (tells TypeScript it's a string)
+
   // standings: holds array of driver data
   // setStandings: function to update standings (like standings = newValue)
   // useState([]) means it starts as an empty array
@@ -66,24 +78,28 @@ export default function EventDetailsPage() {
     // This function gets data from the backend API
     const fetchEventDetails = async () => {
       try {
-        // API URL: In dev uses proxy, in production uses env variable
-        const apiUrl = import.meta.env.VITE_API_URL 
-          ? `${import.meta.env.VITE_API_URL}/api/v1/events/${event_date}`
-          : `/api/v1/events/${event_date}`
+        // -------------- NOW calling the API function we created in api.ts -------------
+        // // API URL: In dev uses proxy, in production uses env variable
+        // const apiUrl = import.meta.env.VITE_API_URL 
+        //   ? `${import.meta.env.VITE_API_URL}/api/v1/events/${event_date}`
+        //   : `/api/v1/events/${event_date}`
         
-        // Call the backend API (like using fetch() in vanilla JS)
-        const response = await fetch(apiUrl)
+        // // Call the backend API (like using fetch() in vanilla JS)
+        // const response = await fetch(apiUrl)
         
-        // Check if request was successful
-        if (!response.ok) {
-          throw new Error('Failed to fetch event details')
-        }
+        // // Check if request was successful
+        // if (!response.ok) {
+        //   throw new Error('Failed to fetch event details')
+        // }
         
-        // Convert response to JSON (same as vanilla JS)
-        const data = await response.json()
+        // // Convert response to JSON (same as vanilla JS)
+        // const data = await response.json()
+
+        
+        const eventData = await fetchEventByDate(event_date!)
 
         // Update the eventDetails variable with the data we got
-        setEventDetails(data.event)
+        setEventDetails(eventData)
 
         // We're done loading
         setLoading(false)

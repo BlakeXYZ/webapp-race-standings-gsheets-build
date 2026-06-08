@@ -12,6 +12,12 @@ import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
 
 // ============================================================================
+// API FUNCTIONS - These are the functions that talk to our backend API
+// ============================================================================
+import { fetchAllEvents } from '@/services/api'
+
+
+// ============================================================================
 // DATA TYPES - Defining what our data looks like (optional but helpful)
 // ============================================================================
 
@@ -57,24 +63,28 @@ export default function EventList() {
     // This function gets data from the backend API
     const fetchEvents = async () => {
       try {
-        // API URL: In dev uses proxy, in production uses env variable
-        const apiUrl = import.meta.env.VITE_API_URL 
-          ? `${import.meta.env.VITE_API_URL}/api/v1/events/`
-          : '/api/v1/events/'
+
+        // -------------- NOW calling the API function we created in api.ts --------------
+        // // API URL: In dev uses proxy, in production uses env variable
+        // const apiUrl = import.meta.env.VITE_API_URL 
+        //   ? `${import.meta.env.VITE_API_URL}/api/v1/events/`
+        //   : '/api/v1/events/'
         
-        // Call the backend API (like using fetch() in vanilla JS)
-        const response = await fetch(apiUrl)
+        // // Call the backend API (like using fetch() in vanilla JS)
+        // const response = await fetch(apiUrl)
         
-        // Check if request was successful
-        if (!response.ok) {
-          throw new Error('Failed to fetch events')
-        }
+        // // Check if request was successful
+        // if (!response.ok) {
+        //   throw new Error('Failed to fetch events')
+        // }
         
-        // Convert response to JSON (same as vanilla JS)
-        const data = await response.json()
+        // // Convert response to JSON (same as vanilla JS)
+        // const data = await response.json()
+
+        const eventsData = await fetchAllEvents()
         
         // Update the events variable with the data we got
-        setEvents(data.events)
+        setEvents(eventsData)
 
         // We're done loading
         setLoading(false)
