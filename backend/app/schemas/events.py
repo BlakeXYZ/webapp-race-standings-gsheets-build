@@ -27,7 +27,7 @@ class DriverStanding(BaseModel):
     penalty: str
     total_time: str
     unnamed: Optional[str]
-    # Add run_X and run_X_cones fields as Optional[str] if you want strict typing
+    run_details: Optional[list] = None  # This will hold the array of runs after transformation
 
 class EventData(BaseModel):
     event_overview: EventOverview

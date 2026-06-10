@@ -27,9 +27,6 @@ export default function DriverCard({ driver }: DriverCardProps) {
         hover:border-blue-400 dark:hover:border-blue-500 
 
         hover:shadow-md hover:scale-[1.01] 
-        
-
-
       "
     >
       <CardHeader className="pb-4">
@@ -127,11 +124,40 @@ export default function DriverCard({ driver }: DriverCardProps) {
               </div>
               
             </div>
+
+
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">
+                Run Details
+              </h4>
+
+              {/* Dynamic grid: 2-4 columns based on number of runs */}
+              <div className="grid grid-cols-4 gap-4">
+                
+                {/* Loop through run_details array */}
+                {driver.run_details && driver.run_details.map((run) => (
+                  <div key={run.number}>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs">
+                      Run {run.number}
+                    </p>
+                    <p className="font-semibold text-sm ">
+                      {run.time}s
+                      {run.cones > 0 && (
+                        <span className="text-red-500 dark:text-red-400 ml-1">
+                          +{run.cones}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                ))}
+                
+              </div>
+            </div>
           </div>
         )}
 
 
-        <div className="flex justify-end mt-2">
+        <div className="flex justify-end mt-3">
 
         {/* Expand indicator */}
             <span className="text-xs font-thin text-slate-400 dark:text-slate-500">

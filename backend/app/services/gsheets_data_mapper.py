@@ -75,6 +75,60 @@ def parse_sheet_name(sheet_name: str) -> Dict[str, Any]:
         "event_type": event_type
     }
 
+def _transform_runs_to_array(driver_data: Dict[str, Any], total_runs: int) -> Dict[str, Any]:
+    """
+    Transform flat run_X structure to nested runs array.
+    
+    Args:
+        driver_data: Driver dictionary with run_1, run_1_cones, etc.
+        total_runs: Maximum number of runs in the event
+        
+    Returns:
+        Driver dictionary with 'runs' array and run_X keys removed
+        
+    Example output:
+        {
+            "driver": "Alex Greenbaum",
+            "run_details": [
+                {"number": 1, "time": "89.59", "cones": 0},
+                {"number": 2, "time": "88.37", "cones": 0}
+            ]
+        }
+    """
+    run_details = []
+    
+    for i in range(1, total_runs + 1):
+        time_key = f'run_{i}'
+        cones_key = f'run_{i}_cones'
+        
+        time_value = driver_data.get(time_key)
+        cones_value = driver_data.get(cones_key, '')  # Default to empty string
+        
+        # Only include runs that have a time value
+        if time_value is not None and time_value != '':
+            # Convert cones to int, handle empty strings and None
+            cones_int = 0
+            if cones_value and str(cones_value).strip():
+                try:
+                    cones_int = int(cones_value)
+                except (ValueError, TypeError):
+                    cones_int = 0
+            
+            run_details.append({
+                'number': i,
+                'time': time_value,
+                'cones': cones_int
+            })
+    
+    # Remove old run_X keys from driver data
+    keys_to_remove = [k for k in list(driver_data.keys()) if k.startswith('run_')]
+    for key in keys_to_remove:
+        del driver_data[key]
+    
+    # Add runs array
+    driver_data['run_details'] = run_details
+    
+    return driver_data
 
 def organize_data_into_structured_format(sheet_data: List[List[str]], sheet_name: str) -> Dict[str, Any]:
     """Organize raw sheet data into a structured format (list of dictionaries).
@@ -147,14 +201,9 @@ def organize_data_into_structured_format(sheet_data: List[List[str]], sheet_name
     parsed_sheet_name = parse_sheet_name(sheet_name)
     event_overview.update(parsed_sheet_name)
 
-    # Cull unnecessary Runs - remove all keys that start with "run_" and are greater than total_runs
     for row in structured_data:
-        keys_to_remove = [
-            key for key in row.keys() 
-            if key.startswith("run_") and key != "runs" and int(key.split("_")[1]) > total_runs
-        ]
-        for key in keys_to_remove:
-            del row[key]
+        # Transform runs to array format for each driver
+        row = _transform_runs_to_array(row, total_runs)
 
     drivers_by_overall = {row['overall']: row for row in structured_data if 'overall' in row}
     drivers_by_name = {row['driver']: row for row in structured_data if 'driver' in row}

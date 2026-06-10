@@ -8,10 +8,22 @@
 export interface EventDetail {
   name: string    // Event name
   date: string      // Event date
-  overview: string
+  overview: EventOverview
   drivers_by_overall: Record<string, Driver>
   drivers_by_name: Record<string, Driver>
 }
+
+
+export interface EventOverview {
+    event_name_shorthand: string
+    total_drivers: number
+    total_runs: number
+    total_cones: number
+    event_number: string | null
+    event_date: string | null
+    event_type: string | null
+}
+
 
 export interface Driver {
   overall: string
@@ -29,7 +41,13 @@ export interface Driver {
   cones: string
   penalty: string
   total_time: string
-  // ... all fields
+  run_details: RunDetails[]
+}
+
+export interface RunDetails {
+  number: number
+  time: string
+  cones: number
 }
 
 

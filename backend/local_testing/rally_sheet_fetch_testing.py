@@ -41,7 +41,8 @@ repo_root_dir = pathlib.Path(__file__).parent.parent.parent
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 SERVICE_ACCOUNT_FILE = repo_root_dir / "gservice_acct_webapp-race-standings.json"
 GSHEET_API_KEY = os.getenv("GSHEET_API_KEY")
-GSHEET_RALLYCROSS_ID = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
+# GSHEET_RALLYCROSS_ID = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
+GSHEET_RALLYCROSS_ID = "1cTXVoRXgWbgwh8uP-pchAbzf8FRjtRuyR7x_JwLrBHA"
 
 #use parent dir of this file as the working dir, so that the credentials.json and token.json files are in the same dir as this file
 root_dir = pathlib.Path(__file__).parent
@@ -202,7 +203,7 @@ def main():
 
     # Get all sheet names
     sheet_names = get_all_sheet_names(service=service, spreadsheet_id=GSHEET_RALLYCROSS_ID, debug=False)
-    sheet_names_2026 = filter_sheets_by_name_keyword(sheet_names=sheet_names, keyword="2026 PE")
+    sheet_names_2026 = filter_sheets_by_name_keyword(sheet_names=sheet_names, keyword="#77")
     
     for sheet_name in sheet_names_2026:
       print(f"\nFetching data from tab: '{sheet_name}'")
