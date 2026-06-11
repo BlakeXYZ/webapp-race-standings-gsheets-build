@@ -32,7 +32,7 @@ export default function DriverCard({ driver }: DriverCardProps) {
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-lg">{driver.driver}</CardTitle>
+            <CardTitle className="text-lg">{driver.driver.toUpperCase()}</CardTitle>
             <CardDescription>{driver.car}</CardDescription>
           </div>
           <div className="flex flex-col items-end gap-1">
@@ -46,32 +46,32 @@ export default function DriverCard({ driver }: DriverCardProps) {
       
       <CardContent className="pb-3">
         {/* ALWAYS VISIBLE - Key Performance Stats */}
-        <div className="grid grid-cols-2 gap-3 text-sm mb-2">
+        <div className="grid grid-cols-4 gap-3 text-sm mb-2">
           {/* Most important - Avg Time */}
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Average Time</p>
-            <p className="font-bold text-lg">{driver.avg_time}s</p>
+          <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
+            <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Avg</p>
+            <p className="text-center font-bold text-base">{driver.avg_time}s</p>
           </div>
           
           {/* Context - Differential */}
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Behind Leader</p>
-            <p className="font-semibold text-lg">
+          <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
+            <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Gap</p>
+            <p className="text-center font-semibold text-base">
               {driver.differential ? `+${driver.differential}s` : '--'}
             </p>
           </div>
 
 
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Runs</p>
-            <p className="font-semibold">{driver.runs}</p>
+          <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
+            <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Runs</p>
+            <p className="text-center font-semibold text-base">{driver.runs}</p>
           </div>
           
 
           {/* Quick penalty indicator */}
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-xs">Cones Hit</p>
-            <p className="font-semibold">
+          <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
+            <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Cones</p>
+            <p className="text-center font-semibold text-base">
               {driver.cones}
             </p>
           </div>
@@ -85,7 +85,7 @@ export default function DriverCard({ driver }: DriverCardProps) {
               Detailed Stats
             </h4>
             
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-4 gap-4 text-sm">
               {/* Consistency */}
 
               <div>
@@ -97,7 +97,7 @@ export default function DriverCard({ driver }: DriverCardProps) {
 
               <div>
                 <p className="text-slate-500 dark:text-slate-400 text-xs">Worst Run</p>
-                <p className="font-semibold">{driver.max}s</p>
+                <p className="font-semibold text-red-600 dark:text-red-400">{driver.max}s</p>
               </div>
 
               <div>

@@ -29,7 +29,15 @@ import { EventDetail } from '@/types/event'
 // API FUNCTIONS - These are the functions that talk to our backend API
 // ============================================================================
 import { fetchEventByDate } from '@/services/api'
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from "@/components/ui/dropdown-menu"
 
 // ============================================================================
 // EVENT DETAILS PAGE COMPONENT - Displays race standings
@@ -63,6 +71,10 @@ export default function EventDetailsPage() {
   
   // error: holds error message, or null if no error
   const [error, setError] = useState<string | null>(null)
+
+  // searchQuery: holds current search text
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<'rank' | 'name'>('rank') // default: sort by rank
 
 
   // ------------------------------------------------------------------
@@ -120,6 +132,33 @@ export default function EventDetailsPage() {
   }, [event_date]) // The [] means "run once when page loads" (like window.onload)
 
   // ------------------------------------------------------------------
+  // FILTER AND SORT DRIVERS
+  // ------------------------------------------------------------------
+  const getFilteredAndSortedDrivers = () => {
+    if (!eventDetails) return []
+    
+    let drivers = Object.values(eventDetails.drivers_by_overall)
+    
+    // FILTER: Search by driver name
+    if (searchQuery) {
+      drivers = drivers.filter(driver => 
+        driver.driver.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+    
+    // SORT: By rank or name
+    if (sortBy === 'name') {
+      drivers = [...drivers].sort((a, b) => 
+        a.driver.localeCompare(b.driver)
+      )
+    }
+    // If sortBy === 'rank', already sorted by overall position
+    
+    return drivers
+  }
+
+
+  // ------------------------------------------------------------------
   // RENDER - This is the HTML that gets displayed
   // Everything below "return" is just HTML with some JS mixed in
   // {variable} is how you show a variable's value in the HTML
@@ -157,6 +196,82 @@ export default function EventDetailsPage() {
               </h2>
             </>
           )}
+
+        {/* Search, Filter, and Sort Components */}
+        {!loading && !error && eventDetails && (
+          <div className="mb-6 space-y-3">
+
+            <div className="flex gap-2">
+            {/* Search Input */}
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search Drivers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 
+                          bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                          focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+
+            {/* Sort By Icon for Dropdown */}
+            <div className="">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="hover:shadow-md hover:scale-[1.01]  w-full h-full px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center gap-2">
+                 
+                  <svg className="text-slate-500 dark:text-slate-400 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                          d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                  </svg>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48">
+
+
+                  <DropdownMenuItem asChild>
+                    <button
+                      onClick={() => setSortBy('rank')}
+                      className={` ${
+                        sortBy === 'rank' 
+                          ? 'text-white dark:text-white'
+                          : 'text-slate-500 dark:text-slate-500'
+                      }`}
+                    >
+                      Sort by Rank
+                    </button>
+                  </DropdownMenuItem>
+
+
+                  <DropdownMenuItem asChild>
+                    <button
+                      onClick={() => setSortBy('name')}
+                      className={` ${
+                        sortBy === 'name' 
+                          ? 'text-white dark:text-white' 
+                          : 'text-slate-500 dark:text-slate-500'
+                      }`}
+                    >
+                      Sort by Name
+                    </button>
+                  </DropdownMenuItem>
+
+   
+
+                
+              </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            </div>
+
+            {/* Results count */}
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Showing {getFilteredAndSortedDrivers().length} of {Object.keys(eventDetails.drivers_by_overall).length} drivers
+            </p>
+          </div>
+        )}
+
 
 
 
@@ -202,13 +317,23 @@ export default function EventDetailsPage() {
         </Card>
         )}
 
+        {/* SEARCH, FILTER, and SORT COMPONENTS */}
+
 
         {/* DRIVER STANDINGS */}
         {!loading && !error && eventDetails && (
           <div>
-            {Object.values(eventDetails.drivers_by_overall).map((driverData) => (
+            {getFilteredAndSortedDrivers().map((driverData) => (
               <DriverCard key={driverData.overall} driver={driverData} />
             ))}
+
+
+            {/* No results message */}
+            {getFilteredAndSortedDrivers().length === 0 && (
+              <p className="text-center text-slate-500 dark:text-slate-400 py-8">
+                No drivers found matching "{searchQuery}"
+              </p>
+            )}
           </div>
         )}
 
