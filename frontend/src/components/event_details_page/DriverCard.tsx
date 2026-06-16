@@ -8,79 +8,125 @@ import { Driver } from '@/types/event'
 
 interface DriverCardProps {
   driver: Driver
+  isEven?: boolean // Optional prop to indicate if this is an even row for styling
 }
 
-export default function DriverCard({ driver }: DriverCardProps) {
+export default function DriverCard({ driver, isEven }: DriverCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <Card 
       onClick={() => setIsExpanded(!isExpanded)}
-      className="
+      className={`
       
         hover:shadow-lg transition-all duration-200 mt-5 cursor-pointer
 
-        border border-l-8 border-l-blue-500 dark:border-l-blue-600
-      
+        border border-l-8 
+        
+        border-l-blue-500 dark:border-l-blue-600
         bg-slate-50 dark:bg-slate-800 
+      
+        ${isEven 
+          ? 'border-l-blue-500/50 dark:border-l-blue-600/50 bg-slate-50/50 dark:bg-slate-800/40' 
+          : 'border-l-blue-500 dark:border-l-blue-600 bg-slate-200/55 dark:bg-slate-800'
+        }
+
         
         hover:border-blue-400 dark:hover:border-blue-500 
-
         hover:shadow-md hover:scale-[1.01] 
-      "
+
+
+      `}
     >
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg">{driver.driver.toUpperCase()}</CardTitle>
-            <CardDescription>{driver.car}</CardDescription>
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="text-2xl font-bold">#{driver.overall}</span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
+
+
+          <div className="flex flex-col items-start gap-1">
+            <p className={`
+            
+            
+            text-2xl font-bold
+            ${isEven ? 
+              'text-slate-900 dark:text-blue-100' 
+              : 'text-slate-900 dark:text-slate-100'
+            }
+            `}
+            >
+              #{driver.overall}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {driver.class} #{driver.class_rank}
-            </span>
+            </p>
+          </div>
+
+
+          <div className="flex flex-col items-end gap-1">
+            <p className="text-2xl font-bold">{driver.driver.toUpperCase()}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{driver.car}</p>
           </div>
         </div>
+
+
+
       </CardHeader>
       
       <CardContent className="pb-3">
         {/* ALWAYS VISIBLE - Key Performance Stats */}
-        <div className="grid grid-cols-4 gap-3 text-sm mb-2">
+        <div className="flex gap-3 mb-2">
           {/* Most important - Avg Time */}
-          <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
+          <div className={`
+          flex-1 border border-slate-200 dark:border-slate-700 rounded-md p-1
+
+            ${isEven ? 
+              'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700/50' 
+              : 'border-slate-300 dark:border-slate-500/50 bg-slate-200 dark:bg-slate-700'
+            }
+
+          `}
+          >
             <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Avg</p>
             <p className="text-center font-bold text-base">{driver.avg_time}s</p>
           </div>
           
           {/* Context - Differential */}
-          <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
+          <div className={`
+          flex-1 border border-slate-200 dark:border-slate-700 rounded-md p-1
+
+            ${isEven ? 
+              'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700/50' 
+              : 'border-slate-300 dark:border-slate-500/50 bg-slate-200 dark:bg-slate-700'
+            }
+
+          `}
+          >
             <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Gap</p>
             <p className="text-center font-semibold text-base">
               {driver.differential ? `+${driver.differential}s` : '--'}
             </p>
           </div>
-
-
-          <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
-            <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Runs</p>
-            <p className="text-center font-semibold text-base">{driver.runs}</p>
-          </div>
-          
-
-          {/* Quick penalty indicator */}
-          <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
-            <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Cones</p>
-            <p className="text-center font-semibold text-base">
-              {driver.cones}
-            </p>
-          </div>
-
         </div>
 
         {/* Expandable section */}
         {isExpanded && (
           <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+
+
+
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
+                <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Runs</p>
+                <p className="text-center font-semibold text-base">{driver.runs}</p>
+              </div>
+              
+
+              {/* Quick penalty indicator */}
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
+                <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Cones</p>
+                <p className="text-center font-semibold text-base">
+                  {driver.cones}
+                </p>
+              </div>
+
+
             <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">
               Detailed Stats
             </h4>
