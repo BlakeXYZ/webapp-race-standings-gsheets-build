@@ -19,7 +19,8 @@ import './index.css'                   // Global styles (Tailwind CSS)
 ReactDOM.createRoot(document.getElementById('root')!).render(
   
   // StrictMode helps catch bugs during development (optional)
-  <React.StrictMode>
+  // TODO: DISABLE StrictMode in production if it causes issues with certain libraries
+  <React.StrictMode> 
     <BrowserRouter>
         {/* This loads our App component from App.tsx */}
         <App />

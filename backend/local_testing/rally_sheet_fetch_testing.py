@@ -38,7 +38,10 @@ Values from spreadsheet '1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4', range '#
 
 repo_root_dir = pathlib.Path(__file__).parent.parent.parent
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+GOOGLE_API_SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets.readonly",
+    "https://www.googleapis.com/auth/drive.metadata.readonly"
+]
 SERVICE_ACCOUNT_FILE = repo_root_dir / "gservice_acct_webapp-race-standings.json"
 GSHEET_API_KEY = os.getenv("GSHEET_API_KEY")
 # GSHEET_RALLYCROSS_ID = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
@@ -76,7 +79,7 @@ def build_credentials():
   #     token.write(creds.to_json())
 
   creds = service_account.Credentials.from_service_account_file(
-    SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    SERVICE_ACCOUNT_FILE, scopes=GOOGLE_API_SCOPES)
   
   return creds
 
@@ -227,6 +230,26 @@ def main():
   except HttpError as err:
     print(err)
 
+def test_g_drive_api_access():
+    # Test in your Python backend
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+
+    credentials = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=GOOGLE_API_SCOPES)
+
+    drive_service = build('drive', 'v3', credentials=credentials)
+
+    # Test: Get metadata for your spreadsheet
+    file_metadata = drive_service.files().get(
+        fileId=GSHEET_RALLYCROSS_ID,
+        fields='modifiedTime,name'
+    ).execute()
+
+    print(file_metadata)
+    # Should print: {'modifiedTime': '2026-06-16T...', 'name': 'Your Sheet Name'}
+
 
 if __name__ == "__main__":
-  main()
+#   main()
+    test_g_drive_api_access()

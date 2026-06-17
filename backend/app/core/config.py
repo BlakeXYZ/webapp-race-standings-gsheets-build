@@ -80,10 +80,13 @@ class Settings(BaseSettings):
     
     # Google Sheets API Configuration
     GSHEET_API_KEY: Optional[str] = None
-    GOOGLE_API_SCOPES: List[str] = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+    GOOGLE_API_SCOPES: List[str] = [
+        "https://www.googleapis.com/auth/spreadsheets.readonly",
+        "https://www.googleapis.com/auth/drive.metadata.readonly"
+    ]
     GOOGLE_APPLICATION_CREDENTIALS: Optional[str] = None
     # GSHEET_RALLYCROSS_ID: str = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
-    GSHEET_RALLYCROSS_ID: str = "1cTXVoRXgWbgwh8uP-pchAbzf8FRjtRuyR7x_JwLrBHA"
+    GSHEET_RALLYCROSS_ID: str = "1cTXVoRXgWbgwh8uP-pchAbzf8FRjtRuyR7x_JwLrBHA" # Live Sheet
 
     
 

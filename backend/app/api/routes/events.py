@@ -78,10 +78,10 @@ async def get_events(gsheet_service: GoogleSheetsService = Depends(get_sheets_se
 
         event_data = EventData.model_validate(raw_event_data)
         logger.debug(f"Event: {event_name}")
-        logger.debug(f"  Overview Dict: {event_data.event_overview}")
+        # logger.debug(f"  Overview Dict: {event_data.event_overview}")
         # example overview dict:
         # Overview Dict: event_name_shorthand='#76 5/17/2026 PE3' total_drivers=15 total_runs=8 total_cones=16 event_number='#76' event_date='5/17/2026' event_type='Points Event #3'
-        logger.debug(f"  Overview Event Name: {event_data.event_overview.event_name_shorthand}")
+        # logger.debug(f"  Overview Event Name: {event_data.event_overview.event_name_shorthand}")
 
         full_event_name = f"Rallycross {event_data.event_overview.event_number}, {event_data.event_overview.event_type}"
 
