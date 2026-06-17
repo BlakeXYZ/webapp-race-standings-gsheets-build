@@ -14,6 +14,12 @@ interface DriverCardProps {
 export default function DriverCard({ driver, isEven }: DriverCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
+  // Reusable style classes for inner stat boxes
+  const statBoxStyles = isEven 
+    ? 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700/50' 
+    : 'border-slate-300 dark:border-slate-500/50 bg-slate-200 dark:bg-slate-700'
+
+
   return (
     <Card 
       onClick={() => setIsExpanded(!isExpanded)}
@@ -74,33 +80,15 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
         {/* ALWAYS VISIBLE - Key Performance Stats */}
         <div className="flex gap-3 mb-2">
           {/* Most important - Avg Time */}
-          <div className={`
-          flex-1 border border-slate-200 dark:border-slate-700 rounded-md p-1
-
-            ${isEven ? 
-              'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700/50' 
-              : 'border-slate-300 dark:border-slate-500/50 bg-slate-200 dark:bg-slate-700'
-            }
-
-          `}
-          >
+          <div className={`flex-1 border border-slate-200 dark:border-slate-700 rounded-md p-1 ${statBoxStyles}`}>
             <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Avg</p>
             <p className="text-center font-bold text-base">{driver.avg_time}s</p>
           </div>
           
           {/* Context - Differential */}
-          <div className={`
-          flex-1 border border-slate-200 dark:border-slate-700 rounded-md p-1
-
-            ${isEven ? 
-              'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-700/50' 
-              : 'border-slate-300 dark:border-slate-500/50 bg-slate-200 dark:bg-slate-700'
-            }
-
-          `}
-          >
+          <div className={`flex-1 border border-slate-200 dark:border-slate-700 rounded-md p-1 ${statBoxStyles}`}>
             <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Gap</p>
-            <p className="text-center font-semibold text-base">
+            <p className="text-center font-bold text-base">
               {driver.differential ? `+${driver.differential}s` : '--'}
             </p>
           </div>
@@ -111,68 +99,74 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
           <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
 
 
-
-              <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
-                <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Runs</p>
-                <p className="text-center font-semibold text-base">{driver.runs}</p>
-              </div>
+          
+            <div className={`border border-slate-200 dark:border-slate-700 rounded-md p-4 ${statBoxStyles}`}>
+              <h4 className="text-xs font-semibold text-base text-slate-600 dark:text-slate-400 mb-3">
+                Detailed Stats
+              </h4>
               
+              <div className="grid grid-cols-2 gap-4 text-sm">
 
-              {/* Quick penalty indicator */}
-              <div className="bg-slate-100 dark:bg-slate-700 rounded-md p-1">
-                <p className="text-center text-slate-500 dark:text-slate-400 text-xs">Cones</p>
-                <p className="text-center font-semibold text-base">
-                  {driver.cones}
-                </p>
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Runs</p>
+                  <p className="font-semibold text-base">
+                    {driver.runs}
+                  </p>
+                </div>
+
+
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Cones</p>
+                  <p className={`font-semibold text-base ${driver.cones > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
+                    {driver.cones}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Best Run</p>
+                  <p className="font-semibold text-base text-green-600 dark:text-green-400">
+                    {driver.min}s
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Worst Run</p>
+                  <p className="font-semibold text-base text-red-600 dark:text-red-400">{driver.max}s</p>
+                </div>
+
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Min Max Diff</p>
+                  <p className="font-semibold text-base">{driver.min_max_diff}s</p>
+                </div>
+
+
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Penalty Time</p>
+                  <p className={`font-semibold text-base ${driver.penalty > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
+                    {driver.penalty}s
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Raw Time</p>
+                  <p className="font-semibold text-base">{driver.raw_time}s</p>
+                </div>
+
+
+                <div>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Total Time</p>
+                  <p className="font-semibold text-base">{driver.total_time}s</p>
+                </div>
+                
               </div>
-
-
-            <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">
-              Detailed Stats
-            </h4>
-            
-            <div className="grid grid-cols-4 gap-4 text-sm">
-              {/* Consistency */}
-
-              <div>
-                <p className="text-slate-500 dark:text-slate-400 text-xs">Best Run</p>
-                <p className="font-semibold text-green-600 dark:text-green-400">
-                  {driver.min}s
-                </p>
-              </div>
-
-              <div>
-                <p className="text-slate-500 dark:text-slate-400 text-xs">Worst Run</p>
-                <p className="font-semibold text-red-600 dark:text-red-400">{driver.max}s</p>
-              </div>
-
-              <div>
-                <p className="text-slate-500 dark:text-slate-400 text-xs">Min Max Diff</p>
-                <p className="font-semibold">{driver.min_max_diff}s</p>
-              </div>
-
-              <div>
-                <p className="text-slate-500 dark:text-slate-400 text-xs">Penalty Time</p>
-                <p className={`font-semibold ${driver.penalty > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
-                  {driver.penalty}s
-                </p>
-              </div>
-
-              <div>
-                <p className="text-slate-500 dark:text-slate-400 text-xs">Raw Time</p>
-                <p className="font-semibold">{driver.raw_time}s</p>
-              </div>
-
-
-              <div>
-                <p className="text-slate-500 dark:text-slate-400 text-xs">Total Time</p>
-                <p className="font-semibold">{driver.total_time}s</p>
-              </div>
-              
             </div>
 
 
-            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+
+
+            
+
+            <div className={`mt-4 border border-slate-200 dark:border-slate-700 rounded-md p-4 ${statBoxStyles}`}>
               <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3">
                 Run Details
               </h4>
@@ -186,8 +180,13 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
                     <p className="text-slate-500 dark:text-slate-400 text-xs">
                       Run {run.number}
                     </p>
-                    <p className="font-semibold text-sm ">
+                    <p className={`
+                      font-semibold text-base
+                      ${run.time === driver.min ? 'text-green-600 dark:text-green-400' : ''}
+                      ${run.time === driver.max ? 'text-red-600 dark:text-red-400' : ''}
+                    `}>
                       {run.time}s
+
                       {run.cones > 0 && (
                         <span className="text-red-500 dark:text-red-400 ml-1">
                           +{run.cones}
@@ -198,8 +197,9 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
                 ))}
                 
               </div>
+              </div>
             </div>
-          </div>
+
         )}
 
 
