@@ -220,11 +220,11 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
 
 
               {/* Scroll hint indicator (optional) */}
-              <div className="flex sm:hidden justify-center mb-2">
+              {/* <div className="flex sm:hidden justify-center mb-2">
                 <span className="text-xs font-thin text-slate-400 dark:text-slate-500">
                   ← Swipe to see more →
                 </span>
-              </div>
+              </div> */}
 
 
 
