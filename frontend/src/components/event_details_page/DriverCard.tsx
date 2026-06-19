@@ -106,17 +106,21 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
             {/* Horizontal scrollable container */}
             <div className="relative">
               {/* Scrollable wrapper */}
-              <div 
-                ref={scrollContainerRef}
-                className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                style={{ 
-                  scrollBehavior: 'smooth',
-                  WebkitOverflowScrolling: 'touch' // Smooth scrolling on iOS
-                }}
-              >
+                <div 
+                  ref={scrollContainerRef}
+                  className={`
+                    flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 
+                    [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
+                    [mask-image:linear-gradient(to_right,black_90%,transparent)]
+                  `}
+                  style={{ 
+                    scrollBehavior: 'smooth',
+                    WebkitOverflowScrolling: 'touch'
+                  }}
+                >
                 {/* Detailed Stats Container */}
                 <div className={`
-                  flex-shrink-0 w-full snap-center
+                  flex-shrink-0 w-[85%] snap-center
                   border border-slate-200 dark:border-slate-700 rounded-md p-4 
                   ${statBoxStyles}
                 `}>
@@ -177,7 +181,7 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
 
                 {/* Run Details Container */}
                 <div className={`
-                  flex-shrink-0 w-full snap-center
+                  flex-shrink-0 w-[85%] snap-center
                   border border-slate-200 dark:border-slate-700 rounded-md p-4 
                   ${statBoxStyles}
                 `}>
@@ -212,12 +216,18 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
 
               </div>
 
+
+
+
               {/* Scroll hint indicator (optional) */}
               <div className="flex sm:hidden justify-center mb-2">
-                <span className="text-xs text-slate-400 dark:text-slate-500">
+                <span className="text-xs font-thin text-slate-400 dark:text-slate-500">
                   ← Swipe to see more →
                 </span>
               </div>
+
+
+
 
               {/* Navigation arrows */}
               {/* only visible on med to large screens */}
