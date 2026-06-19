@@ -21,11 +21,6 @@ from app.services.gsheets_data_mapper import sanitize_headers, organize_data_int
 
 load_dotenv()
 
-#TODO: Fetch all sheet names in the spreadsheet, and then fetch data from the correct sheet based on the date of the rallycross event (e.g. if the event is on 3/22/2026, fetch data from the sheet with the name that contains "3/22/2026" or "March 22, 2026") - For your project: Combine #1 (Dynamic Sheet Selection) + #4 (Date-Based Fetching)
-#TODO: Dynamic Range Selection - Count of rows will be dynamic based on number of Racers for that Event
-#TODO: Organize the fetched data into a structured format (e.g. a list of dictionaries where each dictionary represents a row of data with column names as keys) 
-#TODO: Later add google sheet cache + data update functionality - For your project: Combine #2 (Polling with Cache) + #5 (Manual Refresh) 
-
 """
 Example Data Fetched from the Google Sheet:
 Values from spreadsheet '1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4', range '#74 3/22/2026 PE1!B8:P37':
