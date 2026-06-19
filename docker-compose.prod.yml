@@ -84,9 +84,6 @@ services:
       #   reservations:
       #     cpus: '0.25'
       #     memory: 256M
-
-    volumes:
-      - ./backend/app:/app/app
     
     # Docker secrets for sensitive credentials
     secrets:
