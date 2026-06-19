@@ -132,7 +132,7 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
 
                     <div>
                       <p className="text-slate-500 dark:text-slate-400 text-xs">Cones</p>
-                      <p className={`font-semibold text-base ${driver.cones > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
+                      <p className={`font-semibold text-base ${Number(driver.cones) > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
                         {driver.cones}
                       </p>
                     </div>
@@ -158,7 +158,7 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
 
                     <div>
                       <p className="text-slate-500 dark:text-slate-400 text-xs">Penalty Time</p>
-                      <p className={`font-semibold text-base ${driver.penalty > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
+                      <p className={`font-semibold text-base ${Number(driver.penalty) > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
                         {driver.penalty}s
                       </p>
                     </div>
