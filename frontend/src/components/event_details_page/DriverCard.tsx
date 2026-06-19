@@ -204,7 +204,7 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
                         `}>
                           {run.time}s
                           {run.cones > 0 && (
-                            <span className="text-red-500 dark:text-red-400 ml-1">
+                            <span className="text-sm text-red-500 dark:text-red-400 ml-1">
                               +{run.cones}
                             </span>
                           )}

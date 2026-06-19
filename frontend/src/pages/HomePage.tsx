@@ -146,20 +146,20 @@ export default function HomePage() {
               {/* STAT 1 - Drivers */}
               <div>
                 {/* Big number on top */}
-                <div className="text-3xl font-bold text-blue-600">45</div>
+                <div className="text-3xl font-bold text-blue-600">--</div>
                 {/* Label below */}
                 <div className="text-sm text-slate-600 dark:text-slate-400">Drivers</div>
               </div>
               
               {/* STAT 2 - Cones */}
               <div>
-                <div className="text-3xl font-bold text-green-600">124</div>
+                <div className="text-3xl font-bold text-green-600">--</div>
                 <div className="text-sm text-slate-600 dark:text-slate-400">Cones Killed</div>
               </div>
               
               {/* STAT 3 - Races */}
               <div>
-                <div className="text-3xl font-bold text-purple-600">6</div>
+                <div className="text-3xl font-bold text-purple-600">--</div>
                 <div className="text-sm text-slate-600 dark:text-slate-400">Events</div>
               </div>
               

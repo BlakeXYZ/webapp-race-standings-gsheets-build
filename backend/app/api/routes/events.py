@@ -68,7 +68,7 @@ async def get_events(gsheet_service: GoogleSheetsService = Depends(get_sheets_se
     logger.info(f"GET /events called - fetching events from Google Sheets")
 
     # get all cached sheet names or fetch them
-    all_events = gsheet_service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID)
+    all_events = gsheet_service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID, keyword=str(settings.GSHEET_2026_EVENTS_KEYWORD))
 
     events_data = []
 

@@ -87,7 +87,7 @@ class Settings(BaseSettings):
     GOOGLE_APPLICATION_CREDENTIALS: Optional[str] = None
     # GSHEET_RALLYCROSS_ID: str = "1HA-DsQrd2pl4h0sOFE7N787MeVflVfMrnZOYu7fvgl4"
     GSHEET_RALLYCROSS_ID: str = "1cTXVoRXgWbgwh8uP-pchAbzf8FRjtRuyR7x_JwLrBHA" # Live Sheet
-
+    GSHEET_2026_EVENTS_KEYWORD: str = "2026 PE"
     
 
 

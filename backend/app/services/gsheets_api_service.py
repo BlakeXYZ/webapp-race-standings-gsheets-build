@@ -230,6 +230,12 @@ class GoogleSheetsService:
         # Fetch fresh data
         return self._get_cached_or_fetch_sheet_data(spreadsheet_id, event_name)
 
+    def get_quick_stats(self, spreadsheet_id: str):
+        #TODO: Implement method to quickly retrieve summary stats for all events without fetching full details
+        # Need to add logic into gsheets_data_mapper to extract summary stats from sheet names 
+        # - Total Drivers Total Cones, Total Events, etc. and store in cache with a special key for quick retrieval
+        pass
+
     def _is_spreadsheet_cache_out_of_date(self, spreadsheet_id: str) -> bool:
         """
         Check if the spreadsheet has been updated since it was last cached.

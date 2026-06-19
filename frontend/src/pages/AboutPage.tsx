@@ -5,6 +5,7 @@
 // Import our pre-made card components (these are just styled divs)
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+import arpLogo from '@/assets/arp_logo.png'
 
 // ============================================================================
 // ABOUT PAGE COMPONENT - Information about the project
@@ -27,9 +28,15 @@ export default function AboutPage() {
         {/* PAGE TITLE */}
         {/* text-center: center align text */}
         {/* mb-8: margin-bottom of 2rem (32px) */}
-        <h1 className="text-4xl font-bold text-center mb-8 text-slate-900 dark:text-slate-100">
+        <h1 className="text-4xl font-bold text-center mb-40 text-slate-900 dark:text-slate-100">
           About
         </h1>
+
+        <img 
+          src={arpLogo} 
+          alt="ARP Logo Background" 
+          className="absolute top-20 left-1/2 -translate-x-1/2 h-80 w-80 opacity-15 pointer-events-none dark:invert" 
+        />
 
         {/* ============================================================ */}
         {/* SECTION 1: PROJECT OVERVIEW */}
