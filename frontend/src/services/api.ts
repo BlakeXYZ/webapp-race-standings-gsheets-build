@@ -24,3 +24,16 @@ export async function fetchEventByDate(eventDate: string) {
   const data = await response.json()
   return data.event  // Extract "event" key
 }
+
+
+/**
+ * Get season overview (driver count, cone count, event count)
+ * Backend: routes/season.py::get_season_overview()
+ * Returns: { seasonOverviewData: SeasonOverview }
+ */
+export async function fetchSeasonOverview() {
+  const response = await fetch(`${API_BASE}/api/v1/season/overview/`)
+  if (!response.ok) throw new Error('Failed to fetch season overview')
+  const data = await response.json()
+  return data.seasonOverviewData  // Extract "seasonOverviewData" key
+}

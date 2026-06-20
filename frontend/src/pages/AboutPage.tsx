@@ -35,7 +35,7 @@ export default function AboutPage() {
         <img 
           src={arpLogo} 
           alt="ARP Logo Background" 
-          className="absolute top-20 left-1/2 -translate-x-1/2 h-80 w-80 opacity-15 pointer-events-none dark:invert" 
+          className="absolute top-20 left-1/2 -translate-x-1/2 h-80 w-80 opacity-15 pointer-events-none" 
         />
 
         {/* ============================================================ */}

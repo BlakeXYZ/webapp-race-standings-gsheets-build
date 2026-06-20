@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 // Import our EventList component - handles event fetching and display
 // This keeps HomePage.tsx clean by separating event logic into its own file
 import EventList from '@/components/events/EventList'
+import QuickStats from '@/components/quick_stats/QuickStats'
 
 
 
@@ -134,40 +135,10 @@ export default function HomePage() {
         {/* ============================================================ */}
         {/* QUICK STATS SECTION - Shows placeholder numbers */}
         {/* ============================================================ */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Stats</CardTitle>
-            <CardDescription>Stats from the {'<YEAR>'} Season</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {/* Grid with 3 columns - each column shows a stat */}
-            <div className="grid grid-cols-3 gap-4 text-center">
-              
-              {/* STAT 1 - Drivers */}
-              <div>
-                {/* Big number on top */}
-                <div className="text-3xl font-bold text-blue-600">--</div>
-                {/* Label below */}
-                <div className="text-sm text-slate-600 dark:text-slate-400">Drivers</div>
-              </div>
-              
-              {/* STAT 2 - Cones */}
-              <div>
-                <div className="text-3xl font-bold text-green-600">--</div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">Cones Killed</div>
-              </div>
-              
-              {/* STAT 3 - Races */}
-              <div>
-                <div className="text-3xl font-bold text-purple-600">--</div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">Events</div>
-              </div>
-              
-              {/* STUB: Replace these numbers with real data from API */}
-              {/* Example: Use useState + useEffect to fetch stats from backend */}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mb-8">
+          <QuickStats />
+        </div>
+
 
         {/* STUB: Add more sections here */}
         {/* Example: Recent races, upcoming events, news feed, etc. */}
