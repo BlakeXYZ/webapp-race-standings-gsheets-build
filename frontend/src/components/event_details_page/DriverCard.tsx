@@ -75,7 +75,7 @@ export default function DriverCard({ driver, isEven }: DriverCardProps) {
           </div>
 
           <div className="flex flex-col items-end gap-1">
-            <p className="text-2xl font-bold text-right">{driver.driver.toUpperCase()}</p>
+            <p className="text-2xl font-bold text-right truncate max-w-[300px] sm:max-w-[500px]">{driver.driver.toUpperCase()}</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">{driver.car}</p>
           </div>
         </div>

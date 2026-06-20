@@ -8,6 +8,7 @@ from googleapiclient.errors import HttpError
 
 from app.core.config import settings
 from app.services.gsheets_data_mapper import organize_data_into_structured_format
+from app.schemas.events import EventData
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +135,24 @@ class GoogleSheetsService:
         return self._get_cached_or_fetch_sheet_data(spreadsheet_id, event_name)
     
     def get_event_by_date(self, spreadsheet_id: str, event_date: str) -> Optional[Dict[str, Any]]:
-        """Get event details by event date using direct date index lookup."""
+        """Get event details by event date using direct date index lookup.
+
+        Returns:
+            {
+                "event_overview": {
+                    "event_name_shorthand": "#74 3/22/2026 PE1",
+                    "total_drivers": 15,
+                    "total_runs": 8,
+                    "total_cones": 16,
+                    "event_number": "#74",
+                    "event_date": "3/22/2026",
+                    "event_type": "Points Event #1"
+                },
+                "drivers_by_overall": { ... },
+                "drivers_by_name": { ... }
+            }
+        
+        """
         cache_key = self._date_index.get(event_date)
         
         if cache_key and cache_key in self._cache:
@@ -160,7 +178,16 @@ class GoogleSheetsService:
         return None
 
     def get_all_events(self, spreadsheet_id: str, keyword: str = "2026 PE") -> Dict[str, Dict[str, Any]]:
-        """Fetch and cache all events matching a keyword."""
+        """Fetch and cache all events matching a keyword.
+        
+        Returns:
+            {
+                "#74 3/22/2026 PE1": { ... structured event data ... },
+                "#75 4/12/2026 PE2": { ... structured event data ... },
+                ...
+            }
+        
+        """
         results = {}
         
         try:
@@ -323,16 +350,49 @@ class GoogleSheetsService:
         
         logger.info(f"Invalidated {len(keys_to_remove)} cache entries for spreadsheet {spreadsheet_id}")
 
-    def get_quick_stats(self):
-        #TODO: Implement method to quickly retrieve summary stats for all events without fetching full details
-        # Need to add logic into gsheets_data_mapper to extract summary stats from sheet names 
-        # - Total Drivers Total Cones, Total Events, etc. and store in cache with a special key for quick retrieval
-        pass
+    def get_season_overview_data(self, spreadsheet_id: str, keyword: str = "2026 PE"):
+        """
+        Get an overview of the current racing season.
 
+        Args:
+            spreadsheet_id: The Google Sheets spreadsheet ID
+            keyword: Keyword to filter event sheets (default: "2026 PE")
+        
+        Returns:
+            season_overview_data: Dict[str, Any] = {
+                "season_year": "2026",
+                "driver_count": 123,
+                "cone_count": 456,
+                "event_count": 10
+            }
+        
+        """
 
-    def get_event_count(self):
-        # view cached event count if available, otherwise fetch all events and count
-        logger.info(f"---------------- Current cache keys: {self._cache.keys()}")
+        season_overview_data = {}
+        all_events = self.get_all_events(spreadsheet_id=spreadsheet_id, keyword=keyword)
+
+        # ===== GET SEASON YEAR
+        season_overview_data["season_year"] = keyword.split()[0]  # Extract year from keyword (e.g., "2026 PE" -> "2026")
+        
+        # ===== GET DRIVER COUNT
+        total_unique_drivers = set()
+        for event_name, raw_event_data in all_events.items():
+            event_data = EventData.model_validate(raw_event_data)
+            driver_names = event_data.drivers_by_name.keys()
+            total_unique_drivers.update(driver_names)
+        season_overview_data["driver_count"] = len(total_unique_drivers)
+        
+        # ===== GET CONE COUNT
+        total_cones = 0
+        for event_name, raw_event_data in all_events.items():
+            event_data = EventData.model_validate(raw_event_data)
+            total_cones += event_data.event_overview.total_cones
+        season_overview_data["cone_count"] = total_cones
+
+        # ===== GET EVENT COUNT
+        season_overview_data["event_count"] = len(all_events)
+
+        return season_overview_data
 
 
     # ================================================================

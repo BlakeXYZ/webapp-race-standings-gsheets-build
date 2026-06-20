@@ -18,27 +18,21 @@ import { fetchSeasonOverview } from '@/services/api'
 // DATA TYPES - Defining what our data looks like (optional but helpful)
 // ============================================================================
 
-// This is like a schema - it says each event has these properties
-interface Event {
-  id: number          // Unique event ID
-  name: string        // Event name
-  date: string        // Event date
-}
-
-
+// This is like a schema - it says each season overview has these properties
 interface SeasonOverview {
+  season_year: number
   driver_count: number
   cone_count: number
   event_count: number
 }
 
 // ============================================================================
-// EVENT LIST COMPONENT - Displays list of racing events
+// SEASON OVERVIEW COMPONENT - Displays summary stats for the season
 // ============================================================================
 
 
 
-export default function QuickStats() {
+export default function SeasonOverview() {
 
     // ------------------------------------------------------------------
     // STATE VARIABLES - Think of these like regular variables, but when
@@ -94,7 +88,7 @@ export default function QuickStats() {
         <Card>
           <CardHeader>
             <CardTitle>Quick Stats</CardTitle>
-            <CardDescription>Stats from the {'<YEAR>'} Season</CardDescription>
+            <CardDescription>Stats from the {seasonOverview?.season_year ?? '<YEAR>'} Season</CardDescription>
           </CardHeader>
           <CardContent>
             {/* Grid with 3 columns - each column shows a stat */}

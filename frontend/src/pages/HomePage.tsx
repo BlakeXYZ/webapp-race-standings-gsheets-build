@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 // Import our EventList component - handles event fetching and display
 // This keeps HomePage.tsx clean by separating event logic into its own file
 import EventList from '@/components/events/EventList'
-import QuickStats from '@/components/quick_stats/QuickStats'
+import SeasonOverview from '@/components/season_overview/SeasonOverview'
 
 
 
@@ -136,7 +136,7 @@ export default function HomePage() {
         {/* QUICK STATS SECTION - Shows placeholder numbers */}
         {/* ============================================================ */}
         <div className="mb-8">
-          <QuickStats />
+          <SeasonOverview />
         </div>
 
 

@@ -13,7 +13,7 @@ import logging
 
 from app.core.config import settings          
 from app.services.gsheets_api_service import GoogleSheetsService
-from app.schemas.events import EventData, EventOverview
+from app.schemas.season import SeasonOverview
 
 logger = logging.getLogger(__name__)
 
@@ -68,16 +68,10 @@ async def get_season_overview(gsheet_service: GoogleSheetsService = Depends(get_
     logger.info(f"GET /season/overview called - fetching season overview from Google Sheets")
 
     # get all cached sheet names or fetch them
-    all_events = gsheet_service.get_all_events(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID, keyword=str(settings.GSHEET_2026_EVENTS_KEYWORD))
+    raw_season_data = gsheet_service.get_season_overview_data(spreadsheet_id=settings.GSHEET_RALLYCROSS_ID, keyword=str(settings.GSHEET_2026_EVENTS_KEYWORD))
 
-    events_data = []
-
-    season_overview_data = {}
-
-    # logger debug all event info:
-    logger.debug(f"----------- Retrieved events count = {len(all_events)}")
-
-    season_overview_data["event_count"] = len(all_events)
+    # validate and return
+    season_overview = SeasonOverview.model_validate(raw_season_data)
 
     # for idx, (event_name, raw_event_data) in enumerate(all_events.items()):
 
@@ -98,4 +92,10 @@ async def get_season_overview(gsheet_service: GoogleSheetsService = Depends(get_
 
 
     # Placeholder for actual data retrieval logic
-    return { "seasonOverviewData": season_overview_data }
+    return { "seasonOverviewData": {
+            "season_year": season_overview.season_year,
+            "driver_count": season_overview.driver_count,
+            "cone_count": season_overview.cone_count, 
+            "event_count": season_overview.event_count
+        } 
+    }
