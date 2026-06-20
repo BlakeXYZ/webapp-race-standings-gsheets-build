@@ -32,7 +32,7 @@ export async function fetchEventByDate(eventDate: string) {
  * Returns: { seasonOverviewData: SeasonOverview }
  */
 export async function fetchSeasonOverview() {
-  const response = await fetch(`${API_BASE}/api/v1/season/overview/`)
+  const response = await fetch(`${API_BASE}/api/v1/season/overview`)
   if (!response.ok) throw new Error('Failed to fetch season overview')
   const data = await response.json()
   return data.seasonOverviewData  // Extract "seasonOverviewData" key
